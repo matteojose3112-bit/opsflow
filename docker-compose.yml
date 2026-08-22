@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: opsflow-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: opsflow
+      POSTGRES_USER: opsflow
+      POSTGRES_PASSWORD: opsflow_dev
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - opsflow_pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+
+volumes:
+  opsflow_pgdata:
