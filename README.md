@@ -2,7 +2,13 @@
 
 **Operations intelligence and workflow management dashboard**
 
-OpsFlow is a full-stack operations management application designed to make operational workload visible, measurable, and actionable. It combines a PostgreSQL data layer, FastAPI backend services, and a React/TypeScript dashboard to monitor requests, workload, SLA performance, and escalations.
+OpsFlow is a full-stack operations management application designed to make operational workload visible, measurable, and actionable. It combines PostgreSQL, FastAPI, and a React/TypeScript dashboard to monitor requests, workload, SLA performance, and escalations.
+
+## Live dashboard
+
+**GitHub Pages:** https://matteojose3112-bit.github.io/opsflow/
+
+> The dashboard is a portfolio demonstration. Its frontend is deployed as a static build; the local API/data services are used for development and demonstration.
 
 ## What it demonstrates
 
@@ -14,8 +20,8 @@ OpsFlow is a full-stack operations management application designed to make opera
 - SLA target and breach tracking
 - Escalation monitoring
 - Resolution-time reporting
-- Dashboard metrics backed by live API data
-- Responsive command-center style UI
+- Dashboard metrics backed by API data
+- Responsive command-center UI
 
 ## Architecture
 
@@ -54,7 +60,7 @@ The frontend consumes the backend through HTTP APIs. PostgreSQL is containerized
 
 ## Key API capabilities
 
-The dashboard currently consumes operational endpoints including:
+The dashboard consumes operational endpoints including:
 
 - `/metrics/overview`
 - `/metrics/workload`
@@ -70,7 +76,7 @@ A request can move through a lifecycle such as:
 
 `New → Assigned → In Progress → Resolved → Closed`
 
-The system records status events and can evaluate resolution performance against the applicable SLA. Critical requests can also be surfaced through escalation data.
+The system records status events and evaluates resolution performance against applicable SLA targets. Critical requests can also be surfaced through escalation data.
 
 ## Running locally
 
@@ -102,11 +108,7 @@ npm install
 npm run dev
 ```
 
-Then open:
-
-```text
-http://localhost:5173/
-```
+Then open `http://localhost:5173/`.
 
 ### 4. Production build
 
@@ -123,18 +125,19 @@ opsflow/
 ├── database/              # PostgreSQL initialization / seed SQL
 ├── dashboard/             # React + TypeScript frontend
 │   ├── src/
+│   ├── public/
 │   ├── package.json
-│   └── vite.config.*
-├── docker-compose.yml     # PostgreSQL container configuration
-└── backend files           # FastAPI application and API services
+│   └── vite.config.ts
+├── .github/workflows/     # GitHub Pages deployment
+└── docker-compose.yml     # PostgreSQL container configuration
 ```
 
-## Why this project matters
+## Portfolio value
 
-OpsFlow is intentionally built around realistic operations problems rather than a generic CRUD interface. The project models the kinds of information an operations team needs to manage service delivery: workload, ownership, priority, request lifecycle, SLA compliance, resolution speed, and escalation risk.
+OpsFlow is intentionally built around realistic operations problems rather than a generic CRUD interface. It models the information an operations team needs to manage service delivery: workload, ownership, priority, request lifecycle, SLA compliance, resolution speed, and escalation risk.
 
-It is designed as a portfolio project demonstrating practical experience across **Business Operations, Operations Analytics, CRM/workflow thinking, process design, reporting, and full-stack application development**.
+The project demonstrates practical experience across **Business Operations, Operations Analytics, CRM/workflow thinking, process design, reporting, and full-stack application development**.
 
 ## Status
 
-**MVP functional.** The core data pipeline, API, dashboard, request workspace, metrics, SLA tracking, and escalation visibility are operational. Further workflow controls can be added incrementally without changing the core architecture.
+**MVP complete.** Core data, API, dashboard, request workspace, metrics, SLA tracking, escalation visibility, documentation, and automated GitHub Pages deployment are in place.
