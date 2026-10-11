@@ -1,39 +1,45 @@
 # Changelog
 
-All notable changes to OpsFlow are documented here.
-
-OpsFlow is an actively developing project. This changelog will document its progression from an initial concept into a functional operations intelligence platform.
+Notable changes to OpsFlow are recorded here. Entries describe completed work separately from planned or in-progress work.
 
 ---
 
-## [0.1.0] — Project Foundation
+## [Unreleased] — Operational data model planning
 
 ### Defined
 
-* Established OpsFlow as an operations intelligence project
-* Defined the initial MVP direction
-* Established the focus on operational data and KPI reporting
-* Defined a progressive development approach
-* Documented potential future integrations and technologies
-* Established the project roadmap
+- Selected **general business operations** as the initial product focus.
+- Identified five core domain concepts: accounts, tasks, activities, KPIs, and operational exceptions.
+- Planned typed statuses, priorities, severity levels, dates, ownership, identifiers, and optional relationships between records.
+- Established the next implementation step: create and verify the TypeScript model before adding sample records or dashboard UI.
 
-### Initial MVP Direction
+### Current position
 
-The first implementation will focus on:
+The project is paused at **Phase 1, Step 2A**. The conceptual model has been designed, but the implementation file `src/types.ts` has not yet been confirmed in the GitHub repository. Sample data, KPI calculations, exception rules, and the OpsFlow dashboard are not yet implemented.
 
-* Structured operational data
-* KPI calculations
-* Customer/activity information
-* Open tasks
-* Exception identification
-* Dashboard visualization
+---
 
-### Development
+## [0.1.0] — Application foundation
 
-OpsFlow is being developed as a hands-on learning project with AI used as a development and learning partner.
+### Completed
 
-The goal is to understand the underlying concepts and progressively build more capable systems rather than introduce advanced technologies before they are necessary.
+- Created the OpsFlow GitHub repository.
+- Scaffolded a React + TypeScript + Vite application.
+- Installed dependencies and started the development server.
+- Confirmed the local application preview worked.
+- Ran `npm run build` successfully for the initial application foundation.
+- Preserved the project roadmap and changelog.
+- Committed and pushed the foundation to the `main` branch.
+- Selected Oxlint during setup.
+
+### Project direction
+
+OpsFlow is a hands-on learning project focused on general business operations, structured operational data, KPI reporting, task visibility, and exception identification.
+
+The development method is:
+
+**Learn → Build → Test → Understand → Improve → Repeat**
 
 ### Next
 
-The first development milestone will be a functional React + TypeScript dashboard capable of loading structured operational data, calculating KPIs, and identifying basic operational exceptions.
+Resume Phase 1, Step 2A by creating `src/types.ts`, then run the production build to validate the model before proceeding to sample data and relationships.
