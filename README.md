@@ -1,108 +1,32 @@
-# OpsFlow
+# React + TypeScript + Vite
 
-An operations intelligence platform designed to bring business data, KPIs, workflows, and operational exceptions into a centralized view.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-OpsFlow is a practical software project focused on operations, revenue operations, business intelligence, and process improvement.
+Currently, two official plugins are available:
 
-The project will begin with a minimum functional MVP and progressively evolve toward data integrations, automation, analytics, and operational intelligence.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Current Status
+## React Compiler
 
-**Concept / MVP Planning**
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-The initial objective is to build a functional operations dashboard using structured business data and real calculations before introducing external systems or advanced integrations.
+## Expanding the Oxlint configuration
 
-## Planned MVP
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
 
-The first functional version will focus on:
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+```
 
-* Business data records
-* KPI calculations
-* Operational summaries
-* Customer and activity status
-* Open-task tracking
-* Exception identification
-* Dashboard visualization
-
-The MVP will use local application data initially so the underlying business logic can be understood before introducing external data sources.
-
-## Planned Direction
-
-Future versions may introduce:
-
-* SQL databases
-* Data modeling
-* ETL processes
-* REST APIs
-* CRM integrations
-* Python data processing
-* Automated workflows
-* Power Automate
-* Power BI
-* Operational alerts
-* Advanced reporting
-
-These technologies will be introduced progressively as the application requires them.
-
-## Tech Stack
-
-### Current
-
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* Git
-* GitHub
-
-### Planned
-
-* SQL
-* Python
-* REST APIs
-* CRM systems
-* ETL
-* Power BI
-* Power Automate
-
-## Project Goal
-
-OpsFlow is designed to demonstrate how operational data can be transformed into useful business information and actionable work.
-
-The project focuses on developing practical skills in:
-
-* Operations analysis
-* Data modeling
-* KPI design
-* Business logic
-* Data visualization
-* Process improvement
-* Automation
-* API integration
-* SQL
-* Python
-* Business intelligence
-
-## Development Approach
-
-OpsFlow is being developed through hands-on learning with AI used as a development and learning partner.
-
-The objective is to understand the systems being built, not simply generate them.
-
-The project follows:
-
-**Learn → Build → Test → Understand → Improve → Repeat**
-
-## Roadmap
-
-See [`ROADMAP.md`](ROADMAP.md) for the development plan.
-
-## Changelog
-
-See [`CHANGELOG.md`](CHANGELOG.md) for completed milestones and changes.
-
-## Author
-
-**Matteo Jose**
-
-Building practical software through hands-on learning, experimentation, and AI-assisted development.
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
