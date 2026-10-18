@@ -6,7 +6,7 @@ The first functional milestone focuses on general business operations: tasks, ow
 
 ## Current status
 
-**Phase 1 — Functional Foundation: deployed. Phase 2 — Shared persistence foundation: in progress.**
+**Phase 1 — Functional Foundation: deployed. Phase 2 — Supabase shared task/exception storage: implemented; cross-user validation remains.**
 
 - [x] Create the GitHub repository and React + TypeScript + Vite application.
 - [x] Define TypeScript domain types in `src/types.ts`.
@@ -17,15 +17,14 @@ The first functional milestone focuses on general business operations: tasks, ow
 - [x] Add responsive layouts, account health, recent activity, performance, and exception views.
 - [x] Preserve the Aster-inspired custom cursor and magnetic interactions, including reduced-motion and touch-device handling.
 - [x] Update the README, roadmap, and changelog for the implemented milestone.
-- [x] Add browser-local persistence for task and exception updates.
-- [x] Allow task status changes and exception triage directly in the dashboard.
-- [x] Add a reset control to restore the original demo workspace.
-- [ ] Confirm CI build/lint checks and review desktop/mobile behavior for the new workflows.
-- [x] Design the initial Supabase/PostgreSQL schema for shared workspaces, tasks, and exceptions.
-- [x] Add workspace-member row-level security policies and database setup documentation.
-- [ ] Configure a Supabase project and connect authenticated reads/writes in the app.
+- [x] Add email/password sign-in, sign-up, sign-out, and workspace membership loading.
+- [x] Read tasks and operational exceptions from the authenticated workspace.
+- [x] Save task and exception status changes to Supabase.
+- [x] Enforce read-only task/exception controls for viewer-role members.
+- [x] Pass the public Supabase URL and publishable key into the GitHub Pages build.
+- [ ] Verify shared updates using two separate accounts and browser sessions.
 
-The live interface still starts with **sample data** and saves task and exception changes in this browser using local storage. Changes are not yet shared between users or devices. The shared-storage foundation now includes a Supabase/PostgreSQL migration, workspace membership model, row-level security policies, and setup instructions; the live app will remain local until authentication and the remote data adapter are connected.
+The app requires Supabase email/password authentication and loads tasks and operational exceptions from the member's shared workspace. Task and exception status changes are saved remotely. Accounts, KPIs, and activity remain sample data because they are outside the current database schema. Existing browser-local demo edits are not automatically imported.
 
 See [the shared storage setup guide](./docs/shared-storage.md) before configuring a Supabase project. Never place a Supabase service-role key in frontend code or repository files.
 
@@ -61,7 +60,7 @@ TypeScript interfaces and union types describe these records and constrain value
 - **Vite** for development and production builds.
 - **Oxlint** for linting.
 - **Git and GitHub** for version control and project history.
-- **Supabase / PostgreSQL (planned integration)** for authenticated shared storage and row-level security.
+- **Supabase / PostgreSQL** for email/password authentication and shared task/exception storage with row-level security.
 
 ## Development approach
 
@@ -101,4 +100,4 @@ npm run lint
 
 ## Long-term direction
 
-Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Browser-local persistence is implemented. Shared-storage schema and security policies are prepared; authenticated app integration and two-user verification remain outstanding.
+Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Shared task/exception reads and writes are implemented. Two-user verification and a safe explicit demo-data import flow remain outstanding.

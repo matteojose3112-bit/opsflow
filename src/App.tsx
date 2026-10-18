@@ -12,34 +12,6 @@ const priorityLabels: Record<TaskPriority, string> = {
   low: 'Low',
 };
 const statusOrder: TaskStatus[] = ['in_progress', 'todo', 'blocked', 'done'];
-const storageKey = 'opsflow-workspace-v1';
-
-function loadWorkspace(): { tasks: Task[]; exceptions: OperationalException[] } {
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (raw) {
-      const saved: unknown = JSON.parse(raw);
-      if (saved && typeof saved === 'object' && 'tasks' in saved && 'exceptions' in saved) {
-        const workspace = saved as { tasks: unknown; exceptions: unknown };
-        const validTasks = Array.isArray(workspace.tasks) && workspace.tasks.every((item) =>
-          item && typeof item.id === 'string' && typeof item.title === 'string'
-          && ['todo', 'in_progress', 'blocked', 'done'].includes(item.status),
-        );
-        const validExceptions = Array.isArray(workspace.exceptions) && workspace.exceptions.every((item) =>
-          item && typeof item.id === 'string' && typeof item.title === 'string'
-          && ['open', 'investigating', 'resolved'].includes(item.status),
-        );
-        if (validTasks && validExceptions) {
-          return { tasks: workspace.tasks as Task[], exceptions: workspace.exceptions as OperationalException[] };
-        }
-      }
-    }
-  } catch {
-    // If storage is unavailable or invalid, fall back to the built-in demo workspace.
-  }
-  return { tasks: sampleData.tasks, exceptions: sampleData.exceptions };
-}
-
 function initials(name: string) {
   return name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 }
@@ -57,7 +29,7 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void }) {
+function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
   const account = sampleData.accounts.find((item) => item.id === task.accountId);
   return (
     <article className="task-row">
@@ -65,7 +37,7 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
       <div className="task-main">
         <div className="task-title-line">
           <strong>{task.title}</strong>
-          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
+          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} disabled={!canEdit} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
             <option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Completed</option>
           </select>
           {isOverdue(task) && <span className="overdue-label">Overdue</span>}
@@ -78,31 +50,31 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
   );
 }
 
-function App() {
+interface AppProps {
+  initialTasks: Task[];
+  initialExceptions: OperationalException[];
+  workspaceName: string;
+  userEmail: string;
+  role: string;
+  onTaskStatusChange: (taskId: string, status: TaskStatus) => Promise<void>;
+  onExceptionStatusChange: (exceptionId: string, status: OperationalException['status']) => Promise<void>;
+  onSignOut: () => void;
+}
+
+function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
-  const [tasks, setTasks] = useState<Task[]>(() => loadWorkspace().tasks);
-  const [exceptions, setExceptions] = useState<OperationalException[]>(() => loadWorkspace().exceptions);
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify({ tasks, exceptions }));
-    } catch {
-      // The dashboard remains usable if browser storage is disabled or full.
-    }
-  }, [tasks, exceptions]);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [exceptions, setExceptions] = useState<OperationalException[]>(initialExceptions);
+  useEffect(() => setTasks(initialTasks), [initialTasks]);
+  useEffect(() => setExceptions(initialExceptions), [initialExceptions]);
   const summary = useMemo(() => getDashboardSummary({ ...sampleData, tasks, exceptions }), [tasks, exceptions]);
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
-    setTasks((current) => current.map((task) => task.id === taskId ? { ...task, status } : task));
+    void onTaskStatusChange(taskId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the task update.'));
   };
   const updateExceptionStatus = (exceptionId: string, status: OperationalException['status']) => {
-    setExceptions((current) => current.map((item) => item.id === exceptionId ? { ...item, status } : item));
-  };
-  const resetWorkspace = () => {
-    setTasks(sampleData.tasks);
-    setExceptions(sampleData.exceptions);
-    setQuery('');
-    setStatusFilter('all');
+    void onExceptionStatusChange(exceptionId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the exception update.'));
   };
   const visibleTasks = useMemo(() => tasks
     .filter((task) => statusFilter === 'all' || task.status === statusFilter)
@@ -122,8 +94,8 @@ function App() {
           </a>
           <div className="workspace-label">WORKSPACE</div>
           <button className="workspace-switcher" type="button">
-            <span className="workspace-avatar">N</span>
-            <span className="workspace-copy"><strong>Northstar Group</strong><small>Business operations</small></span>
+            <span className="workspace-avatar">{initials(workspaceName)}</span>
+            <span className="workspace-copy"><strong>{workspaceName}</strong><small>{role} workspace</small></span>
             <span className="switcher-chevron">⌄</span>
           </button>
           <div className="nav-label">WORKSPACE</div>
@@ -144,20 +116,20 @@ function App() {
           </nav>
           <div className="sidebar-bottom">
             <div className="sidebar-tip"><span className="tip-spark">✳</span><strong>Stay ahead of the work.</strong><p>Your operations at a glance, so nothing important slips through.</p></div>
-            <button className="profile-button" type="button"><span className="profile-avatar">MC</span><span><strong>Maya Chen</strong><small>Operations lead</small></span><span className="profile-menu">•••</span></button>
+            <button className="profile-button" type="button" onClick={onSignOut} title="Sign out"><span className="profile-avatar">{initials(userEmail)}</span><span><strong>{userEmail}</strong><small>{role} · Sign out</small></span><span className="profile-menu">↗</span></button>
           </div>
         </aside>
 
         <main className="main-area" id="overview">
           <header className="topbar">
             <div className="breadcrumb"><span>Workspace</span><span className="crumb-slash">/</span><strong>{activeNav}</strong></div>
-            <div className="topbar-actions"><span className="system-status"><i /> All systems operational</span><button className="icon-button notification-button" type="button" aria-label="Notifications">♧<i /></button><span className="topbar-avatar">MC</span></div>
+            <div className="topbar-actions"><span className="system-status"><i /> All systems operational</span><button className="icon-button notification-button" type="button" aria-label="Notifications">♧<i /></button><span className="topbar-avatar">{initials(userEmail)}</span></div>
           </header>
 
           <div className="page-content">
             <section className="welcome-row">
-              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> WEEK 42</div><h1>Good afternoon, Maya <span className="wave">✳</span></h1><p className="page-subtitle">Here’s what’s happening across your operations today.</p></div>
-              <div className="welcome-actions"><button className="secondary-button" type="button" onClick={resetWorkspace}>Reset demo data</button><button className="primary-button" type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
+              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> SHARED WORKSPACE</div><h1>Welcome back <span className="wave">✳</span></h1><p className="page-subtitle">Your workspace updates are saved to the shared database.</p></div>
+              <div className="welcome-actions"><button className="primary-button" type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
             </section>
 
             <section className="metric-grid" aria-label="Operational summary">
@@ -174,7 +146,7 @@ function App() {
                   {([['all','All tasks'],['in_progress','In progress'],['todo','To do'],['blocked','Blocked']] as const).map(([value,label])=><button key={value} className={statusFilter===value?'selected':''} type="button" onClick={()=>setStatusFilter(value)}>{label}{value==='all'&&<span>{summary.totalTasks}</span>}</button>)}
                 </div>
                 <label className="search-field"><span>⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search tasks or owners..." aria-label="Search tasks or owners" /><kbd>⌘ K</kbd></label>
-                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
+                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
                 <div className="panel-footer"><span>Showing {visibleTasks.length} of {tasks.length} tasks</span><div className="task-legend"><i className="legend-done" /> Completed <i className="legend-progress" /> In progress <i className="legend-blocked" /> Blocked</div></div>
               </article>
 
@@ -190,7 +162,7 @@ function App() {
             <section className="bottom-grid">
               <article className="panel exceptions-panel" id="exceptions">
                 <div className="panel-heading"><div><div className="heading-with-count"><h2>Needs attention</h2><span className="heading-count">{summary.openExceptions}</span></div><p>Exceptions that could impact delivery.</p></div><button className="text-button" type="button" onClick={()=>setActiveNav('Exceptions')}>All exceptions <span>↗</span></button></div>
-                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
+                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} disabled={role === 'viewer'} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
               </article>
 
               <article className="panel activity-panel" id="activity">
