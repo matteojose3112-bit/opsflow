@@ -75,7 +75,7 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 ## 🔵 Phase 2 — Data & Business Logic
 
-**Status: In progress**
+**Status: In progress — shared storage schema prepared; app integration not yet connected**
 
 - [x] Persist task and exception status changes in browser local storage.
 - [x] Allow tasks to be moved between to do, in progress, blocked, and completed.
@@ -88,15 +88,23 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 - [ ] Improve exception detection and prioritization.
 - [ ] Add operational summaries.
 - [x] Add browser-local persistence as a learning step before database integration.
+- [x] Design PostgreSQL tables for workspaces, members, tasks, and operational exceptions.
+- [x] Add row-level security policies for authenticated workspace access.
+- [x] Document Supabase setup, client configuration, and credential safety.
+- [ ] Create/configure the Supabase project and apply the migration.
+- [ ] Add sign-in/sign-out and authenticated workspace selection.
+- [ ] Connect task and exception reads/writes to the shared database.
+- [ ] Verify workspace isolation and shared updates in two browser sessions.
+- [ ] Add an explicit, previewable import path if demo data should be moved into a shared workspace.
 
 ---
 
 ## 🟣 Phase 3 — SQL & Data Modeling
 
-**Status: Planned**
+**Status: Started early as part of shared-storage design**
 
 - [ ] Introduce relational data concepts.
-- [ ] Design a database schema based on the tested domain model.
+- [x] Design an initial database schema based on the tested domain model.
 - [ ] Learn and implement SQL queries.
 - [ ] Create reporting queries.
 - [ ] Connect application data to a database.

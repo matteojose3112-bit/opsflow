@@ -6,7 +6,7 @@ The first functional milestone focuses on general business operations: tasks, ow
 
 ## Current status
 
-**Phase 1 — Functional Foundation: deployed. Phase 2 — Persistent workflows: in progress.**
+**Phase 1 — Functional Foundation: deployed. Phase 2 — Shared persistence foundation: in progress.**
 
 - [x] Create the GitHub repository and React + TypeScript + Vite application.
 - [x] Define TypeScript domain types in `src/types.ts`.
@@ -21,8 +21,13 @@ The first functional milestone focuses on general business operations: tasks, ow
 - [x] Allow task status changes and exception triage directly in the dashboard.
 - [x] Add a reset control to restore the original demo workspace.
 - [ ] Confirm CI build/lint checks and review desktop/mobile behavior for the new workflows.
+- [x] Design the initial Supabase/PostgreSQL schema for shared workspaces, tasks, and exceptions.
+- [x] Add workspace-member row-level security policies and database setup documentation.
+- [ ] Configure a Supabase project and connect authenticated reads/writes in the app.
 
-The interface starts with **sample data** and saves task and exception changes in this browser using local storage. Changes are local to this browser and are not shared with other users or devices. A database or live business-system integration is still future work.
+The live interface still starts with **sample data** and saves task and exception changes in this browser using local storage. Changes are not yet shared between users or devices. The shared-storage foundation now includes a Supabase/PostgreSQL migration, workspace membership model, row-level security policies, and setup instructions; the live app will remain local until authentication and the remote data adapter are connected.
+
+See [the shared storage setup guide](./docs/shared-storage.md) before configuring a Supabase project. Never place a Supabase service-role key in frontend code or repository files.
 
 See [ROADMAP.md](./ROADMAP.md) for the phased plan and [CHANGELOG.md](./CHANGELOG.md) for the development history.
 
@@ -56,6 +61,7 @@ TypeScript interfaces and union types describe these records and constrain value
 - **Vite** for development and production builds.
 - **Oxlint** for linting.
 - **Git and GitHub** for version control and project history.
+- **Supabase / PostgreSQL (planned integration)** for authenticated shared storage and row-level security.
 
 ## Development approach
 
@@ -95,4 +101,4 @@ npm run lint
 
 ## Long-term direction
 
-Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Browser-local persistence is implemented; shared persistence and integrations are not yet available.
+Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Browser-local persistence is implemented. Shared-storage schema and security policies are prepared; authenticated app integration and two-user verification remain outstanding.
