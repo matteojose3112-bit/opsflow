@@ -117,6 +117,21 @@ as $
   );
 $;
 
+create or replace function public.is_workspace_editor(target_workspace_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1 from public.workspace_members wm
+    where wm.workspace_id = target_workspace_id
+      and wm.user_id = (select auth.uid())
+      and wm.role in ('owner', 'admin', 'member')
+  );
+$;
+
 create or replace function public.is_workspace_owner(target_workspace_id uuid)
 returns boolean
 language sql
@@ -132,9 +147,11 @@ $;
 
 revoke all on function public.is_workspace_member(uuid) from public;
 revoke all on function public.is_workspace_admin(uuid) from public;
+revoke all on function public.is_workspace_editor(uuid) from public;
 revoke all on function public.is_workspace_owner(uuid) from public;
 grant execute on function public.is_workspace_member(uuid) to authenticated;
 grant execute on function public.is_workspace_admin(uuid) to authenticated;
+grant execute on function public.is_workspace_editor(uuid) to authenticated;
 grant execute on function public.is_workspace_owner(uuid) to authenticated;
 
 alter table public.workspaces enable row level security;
@@ -183,12 +200,12 @@ for select to authenticated using (public.is_workspace_member(workspace_id));
 
 drop policy if exists "Members can create tasks" on public.tasks;
 create policy "Members can create tasks" on public.tasks
-for insert to authenticated with check (public.is_workspace_member(workspace_id));
+for insert to authenticated with check (public.is_workspace_editor(workspace_id));
 
 drop policy if exists "Members can update tasks" on public.tasks;
 create policy "Members can update tasks" on public.tasks
-for update to authenticated using (public.is_workspace_member(workspace_id))
-with check (public.is_workspace_member(workspace_id));
+for update to authenticated using (public.is_workspace_editor(workspace_id))
+with check (public.is_workspace_editor(workspace_id));
 
 drop policy if exists "Admins can delete tasks" on public.tasks;
 create policy "Admins can delete tasks" on public.tasks
