@@ -22,11 +22,16 @@ The first functional milestone focuses on general business operations: tasks, ow
 - [x] Save task and exception status changes to Supabase.
 - [x] Enforce read-only task/exception controls for viewer-role members.
 - [x] Pass the public Supabase URL and publishable key into the GitHub Pages build.
+- [x] Fix the GitHub Pages entry-script path so the app loads under the `/opsflow/` project URL rather than the domain root.
 - [ ] Verify shared updates using two separate accounts and browser sessions.
 
 The app requires Supabase email/password authentication and loads tasks and operational exceptions from the member's shared workspace. Task and exception status changes are saved remotely. Accounts, KPIs, and activity remain sample data because they are outside the current database schema. Existing browser-local demo edits are not automatically imported.
 
 See [the shared storage setup guide](./docs/shared-storage.md) before configuring a Supabase project. Never place a Supabase service-role key in frontend code or repository files.
+
+## Deployment
+
+OpsFlow is published with GitHub Actions to GitHub Pages at `https://matteojose3112-bit.github.io/opsflow/`. Vite is configured with `/opsflow/` as its base path. Keep application asset references compatible with that project subpath; a root-absolute entry such as `/src/main.tsx` points to the domain root and will fail on this deployment. The HTML entry now uses a relative script path, and the production build bundles the app assets.
 
 See [ROADMAP.md](./ROADMAP.md) for the phased plan and [CHANGELOG.md](./CHANGELOG.md) for the development history.
 
