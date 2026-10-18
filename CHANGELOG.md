@@ -4,19 +4,22 @@ Notable changes to OpsFlow are recorded here. Entries distinguish implemented wo
 
 ---
 
-## [Unreleased] — Shared storage foundation
+## [Unreleased] — Supabase authentication and shared workspace
 
 ### Added
 
 - Added a Supabase/PostgreSQL migration for workspaces, membership, tasks, and operational exceptions.
 - Added row-level security policies that require authentication and workspace membership.
 - Added `.env.example` for public Supabase client configuration and a shared-storage setup/security guide.
+- Added email/password sign-in, sign-up, sign-out, workspace membership loading, and remote task/exception reads.
+- Connected task and exception status changes to workspace-scoped Supabase updates.
+- Passed GitHub Actions repository variables into the GitHub Pages Vite build.
 - Updated the roadmap and README to distinguish prepared database infrastructure from a live app connection.
 
 ### Not yet complete
 
-- The dashboard still uses browser-local storage. Supabase authentication, workspace selection, remote reads/writes, and two-user validation are the next implementation steps.
-- The SQL migration has been reviewed in source but has not yet been applied to a live Supabase project.
+- Two-user shared-update validation and a safe, explicit import flow for previous browser-local demo edits remain outstanding.
+- Account, KPI, and activity panels remain sample data; only tasks and operational exceptions are currently stored in Supabase.
 
 ### Added
 
