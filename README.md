@@ -4,6 +4,8 @@ OpsFlow is a hands-on business operations dashboard that turns structured busine
 
 The first functional milestone focuses on general business operations: tasks, ownership, deadlines, account health, performance metrics, and operational exceptions. It is intentionally built with local sample data first, so the data model and calculations can be understood before introducing a backend.
 
+**Live app:** [Open OpsFlow](https://matteojose3112-bit.github.io/opsflow/)
+
 ## Current status
 
 **Phase 1 — Functional Foundation: deployed. Phase 2 — Supabase shared task/exception storage: implemented; cross-user validation remains.**
