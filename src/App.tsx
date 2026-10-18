@@ -5,12 +5,6 @@ import { formatKpiValue, getDashboardSummary, isKpiOnTarget, isOverdue } from '.
 import type { Task, TaskPriority, TaskStatus } from './types';
 import './App.css';
 
-const statusLabels: Record<TaskStatus, string> = {
-  todo: 'To do',
-  in_progress: 'In progress',
-  blocked: 'Blocked',
-  done: 'Completed',
-};
 const priorityLabels: Record<TaskPriority, string> = {
   urgent: 'Urgent',
   high: 'High',
