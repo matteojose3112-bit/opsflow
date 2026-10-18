@@ -29,7 +29,7 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void }) {
+function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
   const account = sampleData.accounts.find((item) => item.id === task.accountId);
   return (
     <article className="task-row">
@@ -37,7 +37,7 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
       <div className="task-main">
         <div className="task-title-line">
           <strong>{task.title}</strong>
-          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} disabled={role === 'viewer'} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
+          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} disabled={!canEdit} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
             <option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Completed</option>
           </select>
           {isOverdue(task) && <span className="overdue-label">Overdue</span>}
@@ -146,7 +146,7 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
                   {([['all','All tasks'],['in_progress','In progress'],['todo','To do'],['blocked','Blocked']] as const).map(([value,label])=><button key={value} className={statusFilter===value?'selected':''} type="button" onClick={()=>setStatusFilter(value)}>{label}{value==='all'&&<span>{summary.totalTasks}</span>}</button>)}
                 </div>
                 <label className="search-field"><span>⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search tasks or owners..." aria-label="Search tasks or owners" /><kbd>⌘ K</kbd></label>
-                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
+                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
                 <div className="panel-footer"><span>Showing {visibleTasks.length} of {tasks.length} tasks</span><div className="task-legend"><i className="legend-done" /> Completed <i className="legend-progress" /> In progress <i className="legend-blocked" /> Blocked</div></div>
               </article>
 
