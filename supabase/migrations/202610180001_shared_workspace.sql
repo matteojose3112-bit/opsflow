@@ -108,14 +108,14 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select exists (
     select 1 from public.workspace_members wm
     where wm.workspace_id = target_workspace_id
       and wm.user_id = (select auth.uid())
       and wm.role in ('owner', 'admin')
   );
-$;
+$$;
 
 create or replace function public.is_workspace_editor(target_workspace_id uuid)
 returns boolean
@@ -123,14 +123,14 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select exists (
     select 1 from public.workspace_members wm
     where wm.workspace_id = target_workspace_id
       and wm.user_id = (select auth.uid())
       and wm.role in ('owner', 'admin', 'member')
   );
-$;
+$$;
 
 create or replace function public.is_workspace_owner(target_workspace_id uuid)
 returns boolean
@@ -138,12 +138,12 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select exists (
     select 1 from public.workspaces w
     where w.id = target_workspace_id and w.owner_id = (select auth.uid())
   );
-$;
+$$;
 
 revoke all on function public.is_workspace_member(uuid) from public;
 revoke all on function public.is_workspace_admin(uuid) from public;
@@ -217,18 +217,18 @@ for select to authenticated using (public.is_workspace_member(workspace_id));
 
 drop policy if exists "Members can create exceptions" on public.operational_exceptions;
 create policy "Members can create exceptions" on public.operational_exceptions
-for insert to authenticated with check (public.is_workspace_member(workspace_id));
+for insert to authenticated with check (public.is_workspace_editor(workspace_id));
 
 drop policy if exists "Members can update exceptions" on public.operational_exceptions;
 create policy "Members can update exceptions" on public.operational_exceptions
-for update to authenticated using (public.is_workspace_member(workspace_id))
-with check (public.is_workspace_member(workspace_id));
+for update to authenticated using (public.is_workspace_editor(workspace_id))
+with check (public.is_workspace_editor(workspace_id));
 
 drop policy if exists "Admins can delete exceptions" on public.operational_exceptions;
 create policy "Admins can delete exceptions" on public.operational_exceptions
 for delete to authenticated using (exists (
   select 1 from public.workspace_members wm
-  where wm.workspace_id = workspace_id and wm.user_id = (select auth.uid())
+  where wm.workspace_id = operational_exceptions.workspace_id and wm.user_id = (select auth.uid())
     and wm.role in ('owner', 'admin')
 ));
 
