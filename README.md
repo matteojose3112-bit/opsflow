@@ -6,7 +6,7 @@ The first functional milestone focuses on general business operations: tasks, ow
 
 ## Current status
 
-**Phase 1 — Functional Foundation: implementation complete; validation pending**
+**Phase 1 — Functional Foundation: deployed. Phase 2 — Persistent workflows: in progress.**
 
 - [x] Create the GitHub repository and React + TypeScript + Vite application.
 - [x] Define TypeScript domain types in `src/types.ts`.
@@ -17,19 +17,21 @@ The first functional milestone focuses on general business operations: tasks, ow
 - [x] Add responsive layouts, account health, recent activity, performance, and exception views.
 - [x] Preserve the Aster-inspired custom cursor and magnetic interactions, including reduced-motion and touch-device handling.
 - [x] Update the README, roadmap, and changelog for the implemented milestone.
-- [ ] Run `npm run build` and `npm run lint` in the development environment and resolve any findings.
-- [ ] Review the dashboard in desktop and mobile previews, verify calculations, and merge the implementation pull request.
+- [x] Add browser-local persistence for task and exception updates.
+- [x] Allow task status changes and exception triage directly in the dashboard.
+- [x] Add a reset control to restore the original demo workspace.
+- [ ] Confirm CI build/lint checks and review desktop/mobile behavior for the new workflows.
 
-The interface uses **sample data in the browser**. It does not yet connect to a database or live business systems. The current feature branch is `feat/opsflow-functional-dashboard`; review the pull request before merging it into `main`.
+The interface starts with **sample data** and saves task and exception changes in this browser using local storage. Changes are local to this browser and are not shared with other users or devices. A database or live business-system integration is still future work.
 
 See [ROADMAP.md](./ROADMAP.md) for the phased plan and [CHANGELOG.md](./CHANGELOG.md) for the development history.
 
 ## Dashboard capabilities
 
 - **Operational summary:** active tasks, overdue tasks, open exceptions, and tracked accounts.
-- **Task overview:** status and priority labels, owner and account context, due dates, overdue indicators, text search, and status filters.
+- **Task overview:** status and priority labels, owner and account context, due dates, overdue indicators, text search, status filters, and editable task status.
 - **Performance snapshot:** KPI values compared against targets, with direction-aware target interpretation.
-- **Exception triage:** open exceptions ordered by severity, with status, owner, and context.
+- **Exception triage:** open exceptions ordered by severity, with editable status, owner, and context.
 - **Recent activity:** a chronological sample of operational changes.
 - **Account health:** a quick view of account owners, industries, and health status.
 
@@ -93,4 +95,4 @@ npm run lint
 
 ## Long-term direction
 
-Potential next steps include richer filtering and sorting, date-based analysis, browser persistence, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. These are future directions, not completed features.
+Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Browser-local persistence is implemented; shared persistence and integrations are not yet available.
