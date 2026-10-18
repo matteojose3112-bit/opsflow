@@ -4,7 +4,21 @@ Notable changes to OpsFlow are recorded here. Entries distinguish implemented wo
 
 ---
 
-## [Unreleased] — Functional dashboard milestone
+## [Unreleased] — Persistent operations workflows
+
+### Added
+
+- Added browser-local persistence for task and exception statuses, with safe fallback to sample data when storage is unavailable or invalid.
+- Added editable task status controls and exception triage status controls.
+- Added a reset action to restore the original sample workspace.
+
+### Validation status
+
+Automated build/lint and desktop/mobile behavior checks are still pending for this change. Data is stored only in the current browser; shared storage and live integrations remain future work.
+
+---
+
+## [0.2.0] — Functional dashboard milestone
 
 ### Added
 
@@ -18,7 +32,7 @@ Notable changes to OpsFlow are recorded here. Entries distinguish implemented wo
 
 ### Validation status
 
-The feature implementation is committed to `feat/opsflow-functional-dashboard`. A production build, lint run, and desktop/mobile preview review still need to be run in the development environment before the branch is merged. The dashboard uses local sample data and does not yet connect to a database or external services.
+The dashboard is deployed on GitHub Pages. CI build/lint and desktop/mobile behavior checks should be confirmed for the persistent-workflows update. The dashboard still starts from sample data and does not connect to a database or external services.
 
 ---
 
