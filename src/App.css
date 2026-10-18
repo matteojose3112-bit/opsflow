@@ -241,6 +241,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ops-cursor-dot,
-  .ops-cursor-ring { display: none !important; }
-  .ops-magnetic-active { transform: none !important; transition: none !important; }
+  .ops-cursor-ring { transition: none !important; }
+  .ops-magnetic-active { transition: none !important; }
 }
