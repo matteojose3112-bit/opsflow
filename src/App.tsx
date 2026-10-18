@@ -12,34 +12,6 @@ const priorityLabels: Record<TaskPriority, string> = {
   low: 'Low',
 };
 const statusOrder: TaskStatus[] = ['in_progress', 'todo', 'blocked', 'done'];
-const storageKey = 'opsflow-workspace-v1';
-
-function loadWorkspace(): { tasks: Task[]; exceptions: OperationalException[] } {
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (raw) {
-      const saved: unknown = JSON.parse(raw);
-      if (saved && typeof saved === 'object' && 'tasks' in saved && 'exceptions' in saved) {
-        const workspace = saved as { tasks: unknown; exceptions: unknown };
-        const validTasks = Array.isArray(workspace.tasks) && workspace.tasks.every((item) =>
-          item && typeof item.id === 'string' && typeof item.title === 'string'
-          && ['todo', 'in_progress', 'blocked', 'done'].includes(item.status),
-        );
-        const validExceptions = Array.isArray(workspace.exceptions) && workspace.exceptions.every((item) =>
-          item && typeof item.id === 'string' && typeof item.title === 'string'
-          && ['open', 'investigating', 'resolved'].includes(item.status),
-        );
-        if (validTasks && validExceptions) {
-          return { tasks: workspace.tasks as Task[], exceptions: workspace.exceptions as OperationalException[] };
-        }
-      }
-    }
-  } catch {
-    // If storage is unavailable or invalid, fall back to the built-in demo workspace.
-  }
-  return { tasks: sampleData.tasks, exceptions: sampleData.exceptions };
-}
-
 function initials(name: string) {
   return name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 }
@@ -65,7 +37,7 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
       <div className="task-main">
         <div className="task-title-line">
           <strong>{task.title}</strong>
-          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
+          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} disabled={role === 'viewer'} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
             <option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Completed</option>
           </select>
           {isOverdue(task) && <span className="overdue-label">Overdue</span>}
@@ -190,7 +162,7 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
             <section className="bottom-grid">
               <article className="panel exceptions-panel" id="exceptions">
                 <div className="panel-heading"><div><div className="heading-with-count"><h2>Needs attention</h2><span className="heading-count">{summary.openExceptions}</span></div><p>Exceptions that could impact delivery.</p></div><button className="text-button" type="button" onClick={()=>setActiveNav('Exceptions')}>All exceptions <span>↗</span></button></div>
-                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
+                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} disabled={role === 'viewer'} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
               </article>
 
               <article className="panel activity-panel" id="activity">
