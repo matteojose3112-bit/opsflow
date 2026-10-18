@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import MouseEffects from './components/layout/MouseEffects';
 import { sampleData } from './data/sampleData';
 import { formatKpiValue, getDashboardSummary, isKpiOnTarget, isOverdue } from './lib/metrics';
@@ -65,7 +65,7 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
       <div className="task-main">
         <div className="task-title-line">
           <strong>{task.title}</strong>
-          <select className={\`task-status-select \${task.status}\`} value={task.status} aria-label={\`Update status for \${task.title}\`} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
+          <select className={`task-status-select ${task.status}`} value={task.status} aria-label={`Update status for ${task.title}`} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
             <option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Completed</option>
           </select>
           {isOverdue(task) && <span className="overdue-label">Overdue</span>}
@@ -190,7 +190,7 @@ function App() {
             <section className="bottom-grid">
               <article className="panel exceptions-panel" id="exceptions">
                 <div className="panel-heading"><div><div className="heading-with-count"><h2>Needs attention</h2><span className="heading-count">{summary.openExceptions}</span></div><p>Exceptions that could impact delivery.</p></div><button className="text-button" type="button" onClick={()=>setActiveNav('Exceptions')}>All exceptions <span>↗</span></button></div>
-                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={\`Update status for \${item.title}\`} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
+                <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
               </article>
 
               <article className="panel activity-panel" id="activity">
