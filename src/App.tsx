@@ -78,31 +78,31 @@ function TaskRow({ task, onStatusChange }: { task: Task; onStatusChange: (taskId
   );
 }
 
-function App() {
+interface AppProps {
+  initialTasks: Task[];
+  initialExceptions: OperationalException[];
+  workspaceName: string;
+  userEmail: string;
+  role: string;
+  onTaskStatusChange: (taskId: string, status: TaskStatus) => Promise<void>;
+  onExceptionStatusChange: (exceptionId: string, status: OperationalException['status']) => Promise<void>;
+  onSignOut: () => void;
+}
+
+function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
-  const [tasks, setTasks] = useState<Task[]>(() => loadWorkspace().tasks);
-  const [exceptions, setExceptions] = useState<OperationalException[]>(() => loadWorkspace().exceptions);
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify({ tasks, exceptions }));
-    } catch {
-      // The dashboard remains usable if browser storage is disabled or full.
-    }
-  }, [tasks, exceptions]);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [exceptions, setExceptions] = useState<OperationalException[]>(initialExceptions);
+  useEffect(() => setTasks(initialTasks), [initialTasks]);
+  useEffect(() => setExceptions(initialExceptions), [initialExceptions]);
   const summary = useMemo(() => getDashboardSummary({ ...sampleData, tasks, exceptions }), [tasks, exceptions]);
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
-    setTasks((current) => current.map((task) => task.id === taskId ? { ...task, status } : task));
+    void onTaskStatusChange(taskId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the task update.'));
   };
   const updateExceptionStatus = (exceptionId: string, status: OperationalException['status']) => {
-    setExceptions((current) => current.map((item) => item.id === exceptionId ? { ...item, status } : item));
-  };
-  const resetWorkspace = () => {
-    setTasks(sampleData.tasks);
-    setExceptions(sampleData.exceptions);
-    setQuery('');
-    setStatusFilter('all');
+    void onExceptionStatusChange(exceptionId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the exception update.'));
   };
   const visibleTasks = useMemo(() => tasks
     .filter((task) => statusFilter === 'all' || task.status === statusFilter)
@@ -122,8 +122,8 @@ function App() {
           </a>
           <div className="workspace-label">WORKSPACE</div>
           <button className="workspace-switcher" type="button">
-            <span className="workspace-avatar">N</span>
-            <span className="workspace-copy"><strong>Northstar Group</strong><small>Business operations</small></span>
+            <span className="workspace-avatar">{initials(workspaceName)}</span>
+            <span className="workspace-copy"><strong>{workspaceName}</strong><small>{role} workspace</small></span>
             <span className="switcher-chevron">⌄</span>
           </button>
           <div className="nav-label">WORKSPACE</div>
@@ -144,20 +144,20 @@ function App() {
           </nav>
           <div className="sidebar-bottom">
             <div className="sidebar-tip"><span className="tip-spark">✳</span><strong>Stay ahead of the work.</strong><p>Your operations at a glance, so nothing important slips through.</p></div>
-            <button className="profile-button" type="button"><span className="profile-avatar">MC</span><span><strong>Maya Chen</strong><small>Operations lead</small></span><span className="profile-menu">•••</span></button>
+            <button className="profile-button" type="button" onClick={onSignOut} title="Sign out"><span className="profile-avatar">{initials(userEmail)}</span><span><strong>{userEmail}</strong><small>{role} · Sign out</small></span><span className="profile-menu">↗</span></button>
           </div>
         </aside>
 
         <main className="main-area" id="overview">
           <header className="topbar">
             <div className="breadcrumb"><span>Workspace</span><span className="crumb-slash">/</span><strong>{activeNav}</strong></div>
-            <div className="topbar-actions"><span className="system-status"><i /> All systems operational</span><button className="icon-button notification-button" type="button" aria-label="Notifications">♧<i /></button><span className="topbar-avatar">MC</span></div>
+            <div className="topbar-actions"><span className="system-status"><i /> All systems operational</span><button className="icon-button notification-button" type="button" aria-label="Notifications">♧<i /></button><span className="topbar-avatar">{initials(userEmail)}</span></div>
           </header>
 
           <div className="page-content">
             <section className="welcome-row">
-              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> WEEK 42</div><h1>Good afternoon, Maya <span className="wave">✳</span></h1><p className="page-subtitle">Here’s what’s happening across your operations today.</p></div>
-              <div className="welcome-actions"><button className="secondary-button" type="button" onClick={resetWorkspace}>Reset demo data</button><button className="primary-button" type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
+              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> SHARED WORKSPACE</div><h1>Welcome back <span className="wave">✳</span></h1><p className="page-subtitle">Your workspace updates are saved to the shared database.</p></div>
+              <div className="welcome-actions"><button className="primary-button" type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
             </section>
 
             <section className="metric-grid" aria-label="Operational summary">
