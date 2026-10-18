@@ -102,8 +102,40 @@ as $$
   );
 $$;
 
+create or replace function public.is_workspace_admin(target_workspace_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1 from public.workspace_members wm
+    where wm.workspace_id = target_workspace_id
+      and wm.user_id = (select auth.uid())
+      and wm.role in ('owner', 'admin')
+  );
+$;
+
+create or replace function public.is_workspace_owner(target_workspace_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1 from public.workspaces w
+    where w.id = target_workspace_id and w.owner_id = (select auth.uid())
+  );
+$;
+
 revoke all on function public.is_workspace_member(uuid) from public;
+revoke all on function public.is_workspace_admin(uuid) from public;
+revoke all on function public.is_workspace_owner(uuid) from public;
 grant execute on function public.is_workspace_member(uuid) to authenticated;
+grant execute on function public.is_workspace_admin(uuid) to authenticated;
+grant execute on function public.is_workspace_owner(uuid) to authenticated;
 
 alter table public.workspaces enable row level security;
 alter table public.workspace_members enable row level security;
@@ -121,16 +153,8 @@ for insert to authenticated with check (owner_id = (select auth.uid()));
 drop policy if exists "Owners and admins can update workspaces" on public.workspaces;
 create policy "Owners and admins can update workspaces" on public.workspaces
 for update to authenticated
-using (exists (
-  select 1 from public.workspace_members wm
-  where wm.workspace_id = id and wm.user_id = (select auth.uid())
-    and wm.role in ('owner', 'admin')
-))
-with check (exists (
-  select 1 from public.workspace_members wm
-  where wm.workspace_id = id and wm.user_id = (select auth.uid())
-    and wm.role in ('owner', 'admin')
-));
+using (public.is_workspace_admin(id) or owner_id = (select auth.uid()))
+with check (public.is_workspace_admin(id) or owner_id = (select auth.uid()));
 
 drop policy if exists "Members can read workspace membership" on public.workspace_members;
 create policy "Members can read workspace membership" on public.workspace_members
@@ -139,42 +163,19 @@ for select to authenticated using (public.is_workspace_member(workspace_id));
 drop policy if exists "Workspace owners can add members" on public.workspace_members;
 create policy "Workspace owners can add members" on public.workspace_members
 for insert to authenticated with check (
-  exists (
-    select 1 from public.workspaces w
-    where w.id = workspace_id and w.owner_id = (select auth.uid())
-  )
-  or exists (
-    select 1 from public.workspace_members current_member
-    where current_member.workspace_id = workspace_id
-      and current_member.user_id = (select auth.uid())
-      and current_member.role in ('owner', 'admin')
-  )
+  public.is_workspace_owner(workspace_id)
+  or public.is_workspace_admin(workspace_id)
 );
 
 drop policy if exists "Owners and admins can change member roles" on public.workspace_members;
 create policy "Owners and admins can change member roles" on public.workspace_members
 for update to authenticated
-using (exists (
-  select 1 from public.workspace_members current_member
-  where current_member.workspace_id = workspace_id
-    and current_member.user_id = (select auth.uid())
-    and current_member.role in ('owner', 'admin')
-))
-with check (exists (
-  select 1 from public.workspace_members current_member
-  where current_member.workspace_id = workspace_id
-    and current_member.user_id = (select auth.uid())
-    and current_member.role in ('owner', 'admin')
-));
+using (public.is_workspace_admin(workspace_id))
+with check (public.is_workspace_admin(workspace_id));
 
 drop policy if exists "Owners and admins can remove members" on public.workspace_members;
 create policy "Owners and admins can remove members" on public.workspace_members
-for delete to authenticated using (exists (
-  select 1 from public.workspace_members current_member
-  where current_member.workspace_id = workspace_id
-    and current_member.user_id = (select auth.uid())
-    and current_member.role in ('owner', 'admin')
-));
+for delete to authenticated using (public.is_workspace_admin(workspace_id));
 
 drop policy if exists "Members can read tasks" on public.tasks;
 create policy "Members can read tasks" on public.tasks
@@ -191,11 +192,7 @@ with check (public.is_workspace_member(workspace_id));
 
 drop policy if exists "Admins can delete tasks" on public.tasks;
 create policy "Admins can delete tasks" on public.tasks
-for delete to authenticated using (exists (
-  select 1 from public.workspace_members wm
-  where wm.workspace_id = workspace_id and wm.user_id = (select auth.uid())
-    and wm.role in ('owner', 'admin')
-));
+for delete to authenticated using (public.is_workspace_admin(workspace_id));
 
 drop policy if exists "Members can read exceptions" on public.operational_exceptions;
 create policy "Members can read exceptions" on public.operational_exceptions
