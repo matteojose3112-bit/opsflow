@@ -12,7 +12,7 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 ## 🟢 Phase 1 — Functional Foundation
 
-**Status: Implementation complete; build and preview validation pending**
+**Status: Deployed; final automated and responsive validation in progress**
 
 ### Step 1 — Application foundation
 
@@ -65,25 +65,29 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 ### Step 6 — MVP validation
 
 - [x] Update the README, roadmap, and changelog to describe the implementation.
-- [ ] Run `npm run build` in the development environment.
-- [ ] Run `npm run lint` and resolve findings.
-- [ ] Review the application in desktop and mobile previews.
-- [ ] Verify key calculations against known sample cases.
-- [ ] Merge the feature branch after review.
+- [x] Deploy the functional dashboard to GitHub Pages.
+- [x] Add browser-local persistence for editable task and exception statuses.
+- [x] Add a reset action for restoring the sample workspace.
+- [ ] Confirm CI build/lint checks for the persistent-workflows branch.
+- [ ] Review status changes and persistence in desktop/mobile previews.
 
 ---
 
 ## 🔵 Phase 2 — Data & Business Logic
 
-**Status: Planned**
+**Status: In progress**
 
+- [x] Persist task and exception status changes in browser local storage.
+- [x] Allow tasks to be moved between to do, in progress, blocked, and completed.
+- [x] Allow exceptions to be opened, investigated, or resolved.
+- [x] Add a reset action to restore the demo workspace.
 - [ ] Add richer filtering and sorting.
 - [ ] Add date-based analysis and trend views.
 - [ ] Expand KPI calculations and comparisons.
 - [ ] Add configurable business rules.
 - [ ] Improve exception detection and prioritization.
 - [ ] Add operational summaries.
-- [ ] Consider browser persistence after the data flow is understood.
+- [x] Add browser-local persistence as a learning step before database integration.
 
 ---
 
