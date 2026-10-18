@@ -2,7 +2,7 @@
 
 ## Status
 
-This milestone adds the database schema and secure access policies for shared OpsFlow workspaces. The app uses Supabase Auth and workspace-scoped database reads/writes when deployed with the GitHub Actions repository variables. Do not treat this foundation as live shared storage yet.
+The app uses Supabase Auth and workspace-scoped database reads/writes when deployed with the GitHub Actions repository variables. Task and exception status updates are shared; account, KPI, and activity panels remain sample data.
 
 ## Why Supabase
 
