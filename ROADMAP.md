@@ -12,7 +12,7 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 ## 🟢 Phase 1 — Functional Foundation
 
-**Status: Deployed; final automated and responsive validation in progress**
+**Status: Deployed; GitHub Pages entry-path issue corrected, with latest workflow validation in progress**
 
 ### Step 1 — Application foundation
 
@@ -66,9 +66,10 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 - [x] Update the README, roadmap, and changelog to describe the implementation.
 - [x] Deploy the functional dashboard to GitHub Pages.
+- [x] Fix the production entry-script path for the `/opsflow/` GitHub Pages project subpath.
 - [x] Add browser-local persistence for editable task and exception statuses.
 - [x] Add a reset action for restoring the sample workspace.
-- [ ] Confirm CI build/lint checks for the persistent-workflows branch.
+- [ ] Confirm CI build/lint checks for the latest documentation and deployment-path commits.
 - [ ] Review status changes and persistence in desktop/mobile previews.
 
 ---
