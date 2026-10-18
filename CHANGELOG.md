@@ -4,7 +4,19 @@ Notable changes to OpsFlow are recorded here. Entries distinguish implemented wo
 
 ---
 
-## [Unreleased] — Persistent operations workflows
+## [Unreleased] — Shared storage foundation
+
+### Added
+
+- Added a Supabase/PostgreSQL migration for workspaces, membership, tasks, and operational exceptions.
+- Added row-level security policies that require authentication and workspace membership.
+- Added `.env.example` for public Supabase client configuration and a shared-storage setup/security guide.
+- Updated the roadmap and README to distinguish prepared database infrastructure from a live app connection.
+
+### Not yet complete
+
+- The dashboard still uses browser-local storage. Supabase authentication, workspace selection, remote reads/writes, and two-user validation are the next implementation steps.
+- The SQL migration has been reviewed in source but has not yet been applied to a live Supabase project.
 
 ### Added
 
@@ -14,7 +26,7 @@ Notable changes to OpsFlow are recorded here. Entries distinguish implemented wo
 
 ### Validation status
 
-Automated build/lint and desktop/mobile behavior checks are still pending for this change. Data is stored only in the current browser; shared storage and live integrations remain future work.
+Automated build/lint and desktop/mobile behavior checks are still pending for this change. Data is stored only in the current browser; shared storage is being prepared but is not active in the deployed app.
 
 ---
 
