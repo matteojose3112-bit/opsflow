@@ -12,64 +12,64 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 ## 🟢 Phase 1 — Functional Foundation
 
-**Status: In progress**
+**Status: Implementation complete; build and preview validation pending**
 
 ### Step 1 — Application foundation
 
 - [x] Create the GitHub repository.
 - [x] Scaffold React + TypeScript + Vite.
 - [x] Install dependencies and start the development server.
-- [x] Confirm the local preview works.
-- [x] Run `npm run build` successfully.
+- [x] Confirm the local preview works for the starter application.
 - [x] Commit and push the foundation to GitHub.
 - [x] Preserve the project documentation.
 - [x] Select Oxlint during project setup.
+- [x] Add Aster-inspired cursor and magnetic interactions with reduced-motion and touch-device handling.
 
 ### Step 2 — Operational data model
-
-**Current position: Step 2A — Define the model**
 
 - [x] Choose general business operations as the product focus.
 - [x] Identify the five initial concepts: accounts, tasks, activities, KPIs, and operational exceptions.
 - [x] Plan identifiers, statuses, priorities, dates, ownership, and optional account/task relationships.
-- [ ] Create `src/types.ts` with TypeScript interfaces and union types.
-- [ ] Run a production build after adding the types.
-- [ ] Review the model and explain the role of each type.
+- [x] Create `src/types.ts` with TypeScript interfaces and union types.
+- [x] Use the domain types across sample records and dashboard calculations.
 
 ### Step 3 — Sample data and relationships
 
-- [ ] Add realistic sample accounts.
-- [ ] Add tasks with different statuses, priorities, owners, and deadlines.
-- [ ] Add activities that reference relevant tasks or accounts.
-- [ ] Add sample KPIs with current values and targets.
-- [ ] Add operational exceptions with severity and resolution status.
-- [ ] Check that IDs and relationships are consistent.
+- [x] Add sample accounts with owners and health status.
+- [x] Add tasks with different statuses, priorities, owners, and deadlines.
+- [x] Add activities that reference relevant tasks or accounts.
+- [x] Add sample KPIs with current values, targets, units, and direction.
+- [x] Add operational exceptions with severity and resolution status.
+- [x] Check sample identifiers and relationships for consistency.
 
 ### Step 4 — Business logic
 
-- [ ] Calculate task totals by status and priority.
-- [ ] Identify overdue tasks using due dates and task status.
-- [ ] Calculate initial KPI performance and target comparisons.
-- [ ] Define explicit rules for creating and resolving exceptions.
-- [ ] Test edge cases so completed tasks and missing optional relationships are handled correctly.
+- [x] Calculate task totals by status and priority.
+- [x] Identify overdue tasks while excluding completed tasks.
+- [x] Compare KPI values to targets using each KPI's better-direction rule.
+- [x] Summarize active tasks, overdue tasks, open exceptions, critical exceptions, accounts, and on-target KPIs.
+- [x] Handle completed tasks and optional account/task relationships in the sample dashboard.
 
 ### Step 5 — Initial dashboard
 
-- [ ] Replace the Vite starter interface with the OpsFlow UI.
-- [ ] Display operational summary metrics.
-- [ ] Show task status and priority.
-- [ ] Display recent activity.
-- [ ] Surface open and high-severity exceptions.
-- [ ] Make the layout usable on desktop and smaller screens.
-- [ ] Test the dashboard against the sample data.
+- [x] Replace the Vite starter interface with the OpsFlow UI.
+- [x] Display operational summary metrics.
+- [x] Show task status, priority, ownership, account context, and due dates.
+- [x] Add task text search and status filters.
+- [x] Display recent activity.
+- [x] Surface open exceptions and severity.
+- [x] Display KPI performance and account health.
+- [x] Add responsive desktop and smaller-screen layouts.
+- [x] Preserve the custom cursor and magnetic interaction layer.
 
 ### Step 6 — MVP validation
 
-- [ ] Review the app for correctness and usability.
-- [ ] Run the production build.
-- [ ] Verify the key calculations against known sample cases.
-- [ ] Update documentation and changelog.
-- [ ] Commit and push the completed milestone.
+- [x] Update the README, roadmap, and changelog to describe the implementation.
+- [ ] Run `npm run build` in the development environment.
+- [ ] Run `npm run lint` and resolve findings.
+- [ ] Review the application in desktop and mobile previews.
+- [ ] Verify key calculations against known sample cases.
+- [ ] Merge the feature branch after review.
 
 ---
 
@@ -77,8 +77,8 @@ Progress is recorded conservatively: a task is marked complete only when the wor
 
 **Status: Planned**
 
-- [ ] Add filtering and sorting.
-- [ ] Add date-based analysis.
+- [ ] Add richer filtering and sorting.
+- [ ] Add date-based analysis and trend views.
 - [ ] Expand KPI calculations and comparisons.
 - [ ] Add configurable business rules.
 - [ ] Improve exception detection and prioritization.
