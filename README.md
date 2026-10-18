@@ -61,7 +61,7 @@ TypeScript interfaces and union types describe these records and constrain value
 - **Vite** for development and production builds.
 - **Oxlint** for linting.
 - **Git and GitHub** for version control and project history.
-- **Supabase / PostgreSQL (planned integration)** for authenticated shared storage and row-level security.
+- **Supabase / PostgreSQL** for email/password authentication and shared task/exception storage for authenticated shared storage and row-level security.
 
 ## Development approach
 
@@ -101,4 +101,4 @@ npm run lint
 
 ## Long-term direction
 
-Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Browser-local persistence is implemented. Shared-storage schema and security policies are prepared; authenticated app integration and two-user verification remain outstanding.
+Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Shared task/exception reads and writes are implemented. Two-user verification and a safe explicit demo-data import flow remain outstanding.
