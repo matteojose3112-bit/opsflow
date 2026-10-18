@@ -62,8 +62,7 @@ function App() {
   const visibleTasks = useMemo(() => sampleData.tasks
     .filter((task) => statusFilter === 'all' || task.status === statusFilter)
     .filter((task) => `${task.title} ${task.owner} ${sampleData.accounts.find((account) => account.id === task.accountId)?.name ?? ''}`.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status))
-    .slice(0, 6), [query, statusFilter]);
+    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)), [query, statusFilter]);
 
   const today = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
