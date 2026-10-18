@@ -2,7 +2,7 @@
 
 ## Status
 
-This milestone adds the database schema and secure access policies for shared OpsFlow workspaces. The live dashboard still uses browser-local persistence until the Supabase project is configured and the authenticated data adapter is connected. Do not treat this foundation as live shared storage yet.
+This milestone adds the database schema and secure access policies for shared OpsFlow workspaces. The app uses Supabase Auth and workspace-scoped database reads/writes when deployed with the GitHub Actions repository variables. Do not treat this foundation as live shared storage yet.
 
 ## Why Supabase
 
@@ -36,13 +36,14 @@ Tasks and exceptions are scoped by `workspace_id`. Row-level security prevents u
 - Do not add public read/write RLS policies to make the dashboard work without authentication.
 - Do not automatically upload browser-local demo edits into a shared workspace. A later import flow should preview records and ask for confirmation to avoid overwriting shared data.
 - Treat a failed remote read/write as an error; do not silently fall back to local writes while presenting the data as shared.
-- The next implementation step is to add Supabase Auth (sign-in/sign-out), a typed repository adapter, workspace selection, and remote task/exception reads and writes. Then add migration/import tooling and test access using two separate accounts.
+- The current app signs in with email/password, loads the first workspace membership for the authenticated user, reads tasks and exceptions from Supabase, and saves status changes remotely. It does not import the browser's old demo edits. The dashboard's account, KPI, and activity panels remain sample data because those tables are not in this initial schema.
 
 ## Validation checklist
 
-- [ ] Apply migration to a fresh Supabase project.
+- [x] Apply migration to the configured Supabase project.
 - [ ] Verify anonymous requests cannot read or modify workspace data.
 - [ ] Verify a workspace member can read and update that workspace's tasks/exceptions.
 - [ ] Verify a non-member cannot access another workspace's records.
 - [ ] Verify viewer role is read-only in the app.
-- [ ] Connect authenticated app reads/writes and test two browser sessions.
+- [x] Connect authenticated app reads/writes for task and exception status.
+- [ ] Verify shared updates in two browser sessions.
