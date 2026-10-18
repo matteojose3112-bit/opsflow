@@ -4,10 +4,30 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>opsflow</title>
+    <meta name="theme-color" content="#0d0f13" />
+    <title>OpsFlow</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #0d0f13; color: #e8e9ee; font-family: system-ui, sans-serif; }
+      #root { min-height: 100vh; }
+      .boot-status { min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+      .boot-card { max-width: 520px; padding: 28px; border: 1px solid #2b303a; border-radius: 16px; background: #13161c; }
+      .boot-card h1 { margin: 0 0 10px; font-size: 22px; }
+      .boot-card p { color: #a6adba; line-height: 1.6; margin: 8px 0 0; }
+      .boot-error { color: #f3a0aa !important; overflow-wrap: anywhere; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot-status"><div class="boot-card"><h1>OpsFlow is starting…</h1><p>The dashboard is loading. If this message remains, the app script did not start correctly.</p></div></div>
+    </div>
+    <script>
+      window.addEventListener('error', function (event) {
+        if (event.target && event.target.tagName === 'SCRIPT') {
+          const root = document.getElementById('root');
+          if (root) root.innerHTML = '<div class="boot-status"><div class="boot-card"><h1>OpsFlow could not load</h1><p>The page is published, but a JavaScript file failed to load.</p><p class="boot-error">' + String(event.target.src || event.message || 'Unknown script error').replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]); }) + '</p><p>Try a hard refresh. If this persists, send this message back so I can trace the exact asset path.</p></div></div>';
+        }
+      }, true);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
