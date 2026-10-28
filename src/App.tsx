@@ -88,7 +88,7 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
       <MouseEffects />
       <div className="app-shell">
         <aside className="sidebar">
-          <a className="brand" href="#overview" onClick={() => setActiveNav('Overview')} aria-label="OpsFlow home">
+          <a className="brand" data-magnetic href="#overview" onClick={() => setActiveNav('Overview')} aria-label="OpsFlow home">
             <span className="brand-mark"><span /></span>
             <span>ops<span className="brand-light">flow</span><small>OPERATIONS OS</small></span>
           </a>
@@ -123,17 +123,17 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
         <main className="main-area" id="overview">
           <header className="topbar">
             <div className="breadcrumb"><span>Workspace</span><span className="crumb-slash">/</span><strong>{activeNav}</strong></div>
-            <div className="topbar-actions"><span className="system-status"><i /> All systems operational</span><button className="icon-button notification-button" type="button" aria-label="Notifications">♧<i /></button><span className="topbar-avatar">{initials(userEmail)}</span></div>
+            <div className="topbar-actions"><span className="system-status"><i /> Workspace connected</span><button className="icon-button notification-button" type="button" aria-label="Notifications are planned" title="Notifications are planned">♧<i /></button><span className="topbar-avatar">{initials(userEmail)}</span></div>
           </header>
 
           <div className="page-content">
             <section className="welcome-row">
-              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> SHARED WORKSPACE</div><h1>Welcome back <span className="wave">✳</span></h1><p className="page-subtitle">Your workspace updates are saved to the shared database.</p></div>
-              <div className="welcome-actions"><button className="primary-button" type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
+              <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> SHARED WORKSPACE</div><h1>Operational overview <span className="wave">✳</span></h1><p className="page-subtitle">Review priorities, track exceptions, and keep work moving across your workspace.</p></div>
+              <div className="welcome-actions"><button className="primary-button" data-magnetic type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
             </section>
 
             <section className="metric-grid" aria-label="Operational summary">
-              <article className="metric-card"><div className="metric-top"><span>Active tasks</span><span className="metric-icon purple">↗</span></div><div className="metric-value">{summary.activeTasks}<span className="metric-total"> / {summary.totalTasks}</span></div><div className="metric-foot"><span className="trend positive">↑ 12%</span><span>vs. last week</span><div className="mini-bars">{[4,6,5,8,6,10,8,12,9,13,11,15].map((h,i)=><i key={i} style={{height:`${h}px`}} />)}</div></div></article>
+              <article className="metric-card"><div className="metric-top"><span>Active tasks</span><span className="metric-icon purple">↗</span></div><div className="metric-value">{summary.activeTasks}<span className="metric-total"> / {summary.totalTasks}</span></div><div className="metric-foot"><span className="trend neutral">Snapshot</span><span>current workload</span><div className="mini-bars">{[4,6,5,8,6,10,8,12,9,13,11,15].map((h,i)=><i key={i} style={{height:`${h}px`}} />)}</div></div></article>
               <article className="metric-card"><div className="metric-top"><span>Overdue tasks</span><span className="metric-icon amber">◷</span></div><div className="metric-value">{summary.overdueTasks.toString().padStart(2,'0')}</div><div className="metric-foot"><span className={summary.overdueTasks ? 'trend negative' : 'trend positive'}>{summary.overdueTasks ? 'Needs attention' : 'All clear'}</span><span>past due date</span></div><div className="metric-progress"><i className="progress-amber" style={{width:`${Math.min(100, summary.overdueTasks / Math.max(1,summary.totalTasks)*100)}%`}} /></div></article>
               <article className="metric-card"><div className="metric-top"><span>Open exceptions</span><span className="metric-icon rose">△</span></div><div className="metric-value">{summary.openExceptions.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend negative">{summary.criticalExceptions} critical</span><span>requiring attention</span></div><div className="exception-segments"><i /><i /><i /><i /><i /><i /><i /><i /></div></article>
               <article className="metric-card"><div className="metric-top"><span>Accounts tracked</span><span className="metric-icon blue">▤</span></div><div className="metric-value">{summary.accountCount.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend neutral">{sampleData.accounts.filter(a=>a.health==='healthy').length} healthy</span><span>active accounts</span></div><div className="avatar-stack">{sampleData.accounts.map((account,i)=><span key={account.id} className={`stack-avatar stack-${i}`} title={account.name}>{initials(account.name)}</span>)}<span className="stack-more">+0</span></div></article>
@@ -154,25 +154,25 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
                 <div className="panel-heading"><div><h2>Performance snapshot</h2><p>Progress against operational targets.</p></div><button className="more-button" type="button" aria-label="More performance options">•••</button></div>
                 <div className="performance-score"><div className="score-ring"><svg viewBox="0 0 100 100" role="img" aria-label={`${Math.round(summary.kpisOnTarget/sampleData.kpis.length*100)} percent of KPIs on target`}><circle className="ring-track" cx="50" cy="50" r="41" /><circle className="ring-value" cx="50" cy="50" r="41" strokeDasharray={`${2*Math.PI*41*summary.kpisOnTarget/sampleData.kpis.length} ${2*Math.PI*41}`} /></svg><div><strong>{Math.round(summary.kpisOnTarget/sampleData.kpis.length*100)}<small>%</small></strong><span>on target</span></div></div><div className="score-copy"><strong>{summary.kpisOnTarget} of {sampleData.kpis.length} KPIs on track</strong><p>Keep focus on the metrics just below target.</p><span className="score-trend">↗ Trending in the right direction</span></div></div>
                 <div className="kpi-list">{sampleData.kpis.map(kpi=><div className="kpi-row" key={kpi.id}><div className="kpi-label"><span>{kpi.name}</span><strong>{formatKpiValue(kpi)}</strong></div><div className="kpi-track"><i className={isKpiOnTarget(kpi)?'kpi-good':'kpi-warn'} style={{width:`${Math.min(100,Math.max(0,kpi.value/Math.max(kpi.target,0.01)*100))}%`}} /></div><div className="kpi-meta"><span>Target {formatKpiValue({...kpi,value:kpi.target})}</span><span className={kpi.change>=0?'change-positive':'change-negative'}>{kpi.change>0?'+':''}{kpi.change}{kpi.unit==='%'?'pp':kpi.unit==='hours'?'h':''}</span></div></div>)}</div>
-                <div className="performance-footer"><span>Last updated just now</span><span className="live-dot" /> Sample data
+                <div className="performance-footer"><span>Illustrative KPI data</span><span className="live-dot" /> Sample data
                 </div>
               </article>
             </section>
 
             <section className="bottom-grid">
               <article className="panel exceptions-panel" id="exceptions">
-                <div className="panel-heading"><div><div className="heading-with-count"><h2>Needs attention</h2><span className="heading-count">{summary.openExceptions}</span></div><p>Exceptions that could impact delivery.</p></div><button className="text-button" type="button" onClick={()=>setActiveNav('Exceptions')}>All exceptions <span>↗</span></button></div>
+                <div className="panel-heading"><div><div className="heading-with-count"><h2>Needs attention</h2><span className="heading-count">{summary.openExceptions}</span></div><p>Exceptions that could impact delivery.</p></div><button className="text-button" type="button" onClick={()=>{setActiveNav('Exceptions'); document.getElementById('exceptions')?.scrollIntoView({behavior:'smooth'});}}>All exceptions <span>↗</span></button></div>
                 <div className="exception-list">{exceptions.filter(item=>item.status!=='resolved').sort((a,b)=>({critical:0,high:1,medium:2,low:3}[a.severity]-{critical:0,high:1,medium:2,low:3}[b.severity])).slice(0,3).map(item=><div className="exception-row" key={item.id}><span className={`severity-icon severity-${item.severity}`}>{item.severity==='critical'?'!':item.severity==='high'?'△':'↗'}</span><div className="exception-copy"><strong>{item.title}</strong><p>{item.description}</p><span className="exception-owner">Owner: {item.owner}</span></div><span className={`severity-pill severity-text-${item.severity}`}>{item.severity}</span><select className="exception-status-select" value={item.status} aria-label={`Update status for ${item.title}`} disabled={role === 'viewer'} onChange={(event) => updateExceptionStatus(item.id, event.target.value as OperationalException['status'])}><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>)}</div>
               </article>
 
               <article className="panel activity-panel" id="activity">
-                <div className="panel-heading"><div><h2>Recent activity</h2><p>A live trail of operational changes.</p></div><button className="more-button" type="button" aria-label="More activity options">•••</button></div>
+                <div className="panel-heading"><div><h2>Recent activity</h2><p>A snapshot of recent operational events.</p></div><button className="more-button" type="button" aria-label="More activity options">•••</button></div>
                 <div className="activity-list">{sampleData.activities.slice(0,4).map((activity,index)=><div className="activity-row" key={activity.id}><span className={`activity-marker activity-marker-${index}`}>{index===0?'↗':index===1?'!':index===2?'✓':'◉'}</span><div className="activity-copy"><strong>{activity.title}</strong><p>{activity.detail}</p><span>{activity.actor} <i>·</i> {relativeTime(activity.occurredAt)}</span></div></div>)}</div>
               </article>
             </section>
 
             <section className="accounts-section" id="accounts"><div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{sampleData.accounts.length} accounts</span></div><div className="account-grid">{sampleData.accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}</div></section>
-            <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>PHASE 1 · FUNCTIONAL FOUNDATION <i /></span></footer>
+            <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>SHARED WORKSPACE · MVP <i /></span></footer>
           </div>
         </main>
       </div>
