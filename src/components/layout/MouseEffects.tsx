@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
-const INTERACTIVE = "a, button, select, [data-magnetic]";
+const INTERACTIVE = "a, button, select";
+const MAGNETIC = "[data-magnetic]";
 
 function MouseEffects() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -21,15 +22,15 @@ function MouseEffects() {
     const move = (event: PointerEvent) => {
       position.current = { x: event.clientX, y: event.clientY };
 
-      document.querySelectorAll<HTMLElement>(INTERACTIVE).forEach((element) => {
+      document.querySelectorAll<HTMLElement>(MAGNETIC).forEach((element) => {
         const rect = element.getBoundingClientRect();
         const dx = event.clientX - (rect.left + rect.width / 2);
         const dy = event.clientY - (rect.top + rect.height / 2);
         const range = Math.max(rect.width, rect.height) * 1.15;
         const distance = Math.hypot(dx, dy);
 
-        if (distance < range) {
-          const strength = (reduceMotion.matches ? 0.06 : 0.12) * (1 - distance / range);
+        if (!reduceMotion.matches && distance < range) {
+          const strength = 0.12 * (1 - distance / range);
           element.style.setProperty("--ops-magnetic-x", `${dx * strength}px`);
           element.style.setProperty("--ops-magnetic-y", `${dy * strength}px`);
           element.classList.add("ops-magnetic-active");
@@ -72,7 +73,7 @@ function MouseEffects() {
       window.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", onPointerOver);
       document.removeEventListener("pointerout", onPointerOut);
-      document.querySelectorAll<HTMLElement>(INTERACTIVE).forEach((element) => {
+      document.querySelectorAll<HTMLElement>(MAGNETIC).forEach((element) => {
         element.style.removeProperty("--ops-magnetic-x");
         element.style.removeProperty("--ops-magnetic-y");
         element.classList.remove("ops-magnetic-active");
