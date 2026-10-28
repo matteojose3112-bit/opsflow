@@ -1,110 +1,96 @@
 # OpsFlow
 
-OpsFlow is a hands-on business operations dashboard that turns structured business data into operational visibility, useful performance indicators, and actionable priorities.
+**Operational clarity, every day.**
 
-The first functional milestone focuses on general business operations: tasks, ownership, deadlines, account health, performance metrics, and operational exceptions. It is intentionally built with local sample data first, so the data model and calculations can be understood before introducing a backend.
+OpsFlow is a focused operations workspace for turning day-to-day business activity into clear priorities. It brings task ownership, deadlines, operational exceptions, account context, and performance indicators into one dashboard.
 
-**Live app:** [Open OpsFlow](https://matteojose3112-bit.github.io/opsflow/)
+**Live app:** [Open OpsFlow](https://matteojose3112-bit.github.io/opsflow/)  
+**Project approach:** Learn → Build → Test → Understand → Improve → Repeat
 
 ## Current status
 
-**Phase 1 — Functional Foundation: deployed. Phase 2 — Supabase shared task/exception storage: implemented; cross-user validation remains.**
+The dashboard is deployed to GitHub Pages. Email/password authentication and shared workspace storage are implemented for tasks and operational exceptions using Supabase and PostgreSQL. Cross-user collaboration and workspace isolation still need validation with separate accounts and browser sessions.
 
-- [x] Create the GitHub repository and React + TypeScript + Vite application.
-- [x] Define TypeScript domain types in `src/types.ts`.
-- [x] Add linked sample records for accounts, tasks, activities, KPIs, and exceptions.
-- [x] Implement task counts, overdue detection, KPI target comparisons, and dashboard summaries.
-- [x] Replace the Vite starter page with the OpsFlow dashboard.
-- [x] Add task search and status filters.
-- [x] Add responsive layouts, account health, recent activity, performance, and exception views.
-- [x] Preserve the Aster-inspired custom cursor and magnetic interactions, including reduced-motion and touch-device handling.
-- [x] Update the README, roadmap, and changelog for the implemented milestone.
-- [x] Add email/password sign-in, sign-up, sign-out, and workspace membership loading.
-- [x] Read tasks and operational exceptions from the authenticated workspace.
-- [x] Save task and exception status changes to Supabase.
-- [x] Enforce read-only task/exception controls for viewer-role members.
-- [x] Pass the public Supabase URL and publishable key into the GitHub Pages build.
-- [x] Fix the GitHub Pages entry-script path so the app loads under the `/opsflow/` project URL rather than the domain root.
-- [ ] Verify shared updates using two separate accounts and browser sessions.
+### Implemented
 
-The app requires Supabase email/password authentication and loads tasks and operational exceptions from the member's shared workspace. Task and exception status changes are saved remotely. Accounts, KPIs, and activity remain sample data because they are outside the current database schema. Existing browser-local demo edits are not automatically imported.
+- Responsive operations dashboard with a refined dark interface and subtle atmospheric background.
+- Task overview with owner, priority, due date, overdue state, search, status filters, and editable status.
+- Operational exception triage with severity, owner, description, and status updates.
+- Summary metrics for active tasks, overdue work, open exceptions, and tracked accounts.
+- KPI snapshot with target comparisons and direction-aware calculations.
+- Account health and recent activity panels.
+- Email/password sign-up, sign-in, sign-out, and workspace membership loading.
+- Supabase-backed task and exception reads and status updates, with workspace-level access policies.
+- Aster-inspired cursor ring and explicitly targeted magnetic interactions on supported desktop pointers.
+- Reduced-motion and touch-device handling.
+- GitHub Pages deployment configured for the `/opsflow/` project path.
 
-See [the shared storage setup guide](./docs/shared-storage.md) before configuring a Supabase project. Never place a Supabase service-role key in frontend code or repository files.
+## Data boundaries
 
-## Deployment
+OpsFlow currently combines shared operational records with clearly illustrative dashboard data.
 
-OpsFlow is published with GitHub Actions to GitHub Pages at `https://matteojose3112-bit.github.io/opsflow/`. Vite is configured with `/opsflow/` as its base path. Keep application asset references compatible with that project subpath; a root-absolute entry such as `/src/main.tsx` points to the domain root and will fail on this deployment. The HTML entry now uses a relative script path, and the production build bundles the app assets.
-
-See [ROADMAP.md](./ROADMAP.md) for the phased plan and [CHANGELOG.md](./CHANGELOG.md) for the development history.
-
-## Dashboard capabilities
-
-- **Operational summary:** active tasks, overdue tasks, open exceptions, and tracked accounts.
-- **Task overview:** status and priority labels, owner and account context, due dates, overdue indicators, text search, status filters, and editable task status.
-- **Performance snapshot:** KPI values compared against targets, with direction-aware target interpretation.
-- **Exception triage:** open exceptions ordered by severity, with editable status, owner, and context.
-- **Recent activity:** a chronological sample of operational changes.
-- **Account health:** a quick view of account owners, industries, and health status.
-
-## Initial data model
-
-The first model is organized around five concepts:
-
-| Concept | Purpose |
+| Area | Current source |
 | --- | --- |
-| **Accounts** | Customers, departments, or business units. |
-| **Tasks** | Work with a status, priority, owner, due date, and optional account relationship. |
-| **Activities** | A history of operational events and changes. |
-| **KPIs** | Metrics with a current value, target, unit, and interpretation direction. |
-| **Operational exceptions** | Risks, issues, or deviations that need attention and resolution tracking. |
+| Tasks and task status | Shared Supabase workspace |
+| Operational exceptions and status | Shared Supabase workspace |
+| Accounts and account health | Sample data |
+| KPIs and activity feed | Sample data |
 
-TypeScript interfaces and union types describe these records and constrain values such as task status, priority, and exception severity. TypeScript checks help during development; data received from external systems will need runtime validation when integrations are introduced.
+Metrics and activity based on sample records are for demonstration, not live business reporting. The dashboard does not yet provide real-time subscriptions, cross-session verification, or an import path for previous browser-local demo edits.
 
-## Technology stack
+## Roadmap
 
-- **React** for the user interface.
-- **TypeScript** for typed application and business data.
-- **Vite** for development and production builds.
-- **Oxlint** for linting.
-- **Git and GitHub** for version control and project history.
-- **Supabase / PostgreSQL** for email/password authentication and shared task/exception storage with row-level security.
+### Next — Reliability and workspace validation
+- [ ] Verify shared task and exception updates across two separate accounts and browser sessions.
+- [ ] Confirm workspace isolation and viewer-role restrictions.
+- [ ] Validate production build, lint, and GitHub Pages deployment.
+- [ ] Smoke-test responsive layouts, focus states, and status updates.
+- [ ] Add clear loading, empty, and recoverable error states where needed.
 
-## Development approach
+### Then — More useful operations
+- [ ] Add richer task search, filtering, sorting, and date-based views.
+- [ ] Add a safe, previewable import flow for demo data when needed.
+- [ ] Move account and activity records to the shared database.
+- [ ] Add operational trends and configurable KPI targets.
+- [ ] Improve exception prioritization and ownership workflows.
 
-This is both a software project and a structured learning project. Each milestone follows:
+### Later — Integrations and intelligence
+- [ ] Connect CRM and other business systems through documented APIs.
+- [ ] Explore event-driven workflows, alerts, and automation.
+- [ ] Add historical reporting, trends, and business intelligence views.
 
-**Learn → Build → Test → Understand → Improve → Repeat**
+See [ROADMAP.md](./ROADMAP.md) for the full plan and [CHANGELOG.md](./CHANGELOG.md) for project history.
 
-Work in small steps, verify each change, and add complexity when it provides practical value.
+## Technology
+
+- **React** and **TypeScript** — interface and typed domain models.
+- **Vite** — development server and production build.
+- **Oxlint** — code linting.
+- **Supabase / PostgreSQL** — authentication and shared task/exception storage.
+- **GitHub Actions / GitHub Pages** — deployment and hosting.
 
 ## Local development
 
-Requirements: a compatible Node.js installation and npm.
-
-Install dependencies:
+Requirements: a compatible Node.js version and npm.
 
 ```bash
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
 ```
 
-Run the production build:
+Before publishing, run:
 
 ```bash
 npm run build
-```
-
-Run linting:
-
-```bash
 npm run lint
 ```
 
-## Long-term direction
+## Deployment notes
 
-Potential next steps include richer filtering and sorting, date-based analysis, SQL and relational databases, APIs and CRM integrations, workflow automation, operational alerts, and business intelligence reporting. Shared task/exception reads and writes are implemented. Two-user verification and a safe explicit demo-data import flow remain outstanding.
+The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path, and `index.html` uses a relative module entry so production assets resolve under the GitHub Pages project URL.
+
+Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supabase. Only the public project URL and publishable/anon key belong in frontend configuration. **Never put a Supabase service-role key in browser code or commit it to the repository.**
+
+## Why this project exists
+
+OpsFlow is both a practical business-operations product and a structured software-learning project. It is built in small increments, with a preference for understanding the data and business rules before adding more complexity.
