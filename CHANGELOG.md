@@ -4,6 +4,30 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [0.3.0] — MVP Closeout & Maintenance Mode
+
+### Clarified
+- Defined the current release as a deployed frontend MVP with Supabase-backed authentication and workspace-scoped task/exception integration.
+- Documented that account health, KPIs, and recent activity remain illustrative sample data.
+- Documented that workspace switching, real-time subscriptions, account/KPI/activity persistence, and demo-data import are not implemented.
+- Distinguished successful CI and Pages deployment from uncompleted live multi-user and security validation.
+- Set the project to maintenance mode pending external validation rather than implying production readiness.
+
+### Validation still required
+- Test shared task and exception updates with two distinct accounts and browser sessions.
+- Verify cross-workspace isolation, viewer restrictions, and anonymous access denial against the live Supabase project.
+- Smoke-test responsive layouts, keyboard focus, and recoverable error states.
+- Confirm the configured live project has the intended RLS policies and redirect settings.
+
+### Existing implementation
+- Email/password authentication and session refresh.
+- Workspace membership loading and role-aware UI controls.
+- Supabase-backed task and operational-exception reads and status updates.
+- PostgreSQL schema and RLS policies for workspaces, members, tasks, and exceptions.
+- GitHub Actions CI and GitHub Pages deployment.
+
+---
+
 ## [Unreleased] — Visual polish and reliability
 
 ### Improved
@@ -16,7 +40,6 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Rewrote the README and roadmap to distinguish implemented functionality from outstanding verification.
 
 ### Validation still required
-- Run the current production build and lint checks.
 - Smoke-test the live GitHub Pages deployment and responsive layouts.
 - Verify task/exception updates across two separate accounts and browser sessions.
 - Confirm workspace isolation and viewer-role restrictions.
