@@ -1,46 +1,47 @@
 # OpsFlow Roadmap
 
-OpsFlow is evolving from an operational dashboard into a dependable workspace for task ownership, exception handling, performance visibility, and eventually workflow automation.
+OpsFlow is a focused operations workspace for task ownership, exception handling, and performance visibility, with a longer-term direction toward safe workflow automation.
 
 **Working method:** Learn → Build → Test → Understand → Improve → Repeat
 
-Progress is marked complete only when the implementation exists. Validation tasks remain open until they have actually been checked.
+Progress is marked complete only when the implementation exists. External validation tasks remain open until they have actually been checked.
 
 ---
 
-## Current milestone — Product polish and reliability
+## Current milestone — Deployed MVP closeout
 
-**Status: UI and documentation polish implemented; production verification and multi-user validation remain open.**
+**Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation remains outstanding.**
 
-- [x] Refine the dark visual system with a subtle atmospheric background and layered surfaces.
-- [x] Align cursor and magnetic behavior with Aster: cursor feedback on interactive controls, magnetic movement only on explicitly marked elements.
-- [x] Respect touch/coarse-pointer devices and reduced-motion preferences.
-- [x] Improve dashboard wording and avoid presenting sample trends as verified business results.
-- [x] Improve page title, description, and social-sharing metadata.
-- [x] Refresh README, roadmap, and changelog to reflect the real implementation.
-- [ ] Run and confirm the current production build and lint checks.
-- [ ] Smoke-test the deployed site on desktop and mobile.
+- [x] Build the responsive operations dashboard and core task/exception views.
+- [x] Add task search, status filters, overdue calculations, and KPI snapshot calculations.
+- [x] Add email/password authentication and workspace membership loading.
+- [x] Connect task and exception reads/status updates to workspace-scoped Supabase tables.
+- [x] Add RLS policies for workspace membership and role-based access.
+- [x] Enforce viewer read-only controls in the interface and database policies.
+- [x] Configure GitHub Actions CI for TypeScript/production build and Oxlint.
+- [x] Configure GitHub Pages deployment for the `/opsflow/` project path.
+- [x] Document implemented scope, sample-data boundaries, and credential safety.
+- [ ] Verify shared updates with two separate accounts and browser sessions.
+- [ ] Verify workspace isolation and viewer restrictions with direct API requests.
+- [ ] Verify anonymous access is denied in the configured Supabase project.
+- [ ] Smoke-test deployed desktop/mobile layouts, keyboard focus, and error states.
 
----
+## Phase 1 — Functional dashboard foundation
 
-## Phase 1 — Functional foundation
-
-**Status: Deployed**
+**Status: Implemented and deployed**
 
 - [x] Create the React + TypeScript + Vite application.
 - [x] Define domain types for accounts, tasks, activities, KPIs, and operational exceptions.
-- [x] Add related sample records and core business calculations.
-- [x] Calculate task totals, overdue tasks, KPI target comparisons, and dashboard summaries.
-- [x] Build a responsive operations dashboard with summary metrics, tasks, account health, activity, KPIs, and exception triage.
+- [x] Add sample records and core business calculations.
+- [x] Build the responsive operations dashboard.
 - [x] Add task search and status filters.
 - [x] Add browser-local persistence as an early learning step.
-- [x] Add a reset action for the sample workspace.
 - [x] Deploy to GitHub Pages and correct the `/opsflow/` project-path entry script.
-- [x] Add Aster-inspired cursor and magnetic interactions with touch and reduced-motion handling.
+- [x] Add reduced-motion and touch-device handling.
 
-## Phase 2 — Shared workspace and reliability
+## Phase 2 — Authentication and shared workspace integration
 
-**Status: Implemented; verification pending**
+**Status: Implemented in code; live security and multi-user validation pending**
 
 - [x] Design PostgreSQL tables for workspaces, members, tasks, and operational exceptions.
 - [x] Add row-level security policies for authenticated workspace access.
@@ -48,21 +49,21 @@ Progress is marked complete only when the implementation exists. Validation task
 - [x] Load the authenticated user's workspace and membership role.
 - [x] Read tasks and exceptions from Supabase.
 - [x] Save task and exception status changes to shared storage.
-- [x] Restrict task and exception editing for viewer-role members.
+- [x] Restrict task and exception editing for viewer-role members in the UI and database policies.
 - [x] Document Supabase setup and frontend credential safety.
 - [ ] Verify shared updates with two separate accounts and browser sessions.
 - [ ] Confirm workspace isolation and viewer restrictions under real test accounts.
-- [ ] Verify loading, error, empty, and permission-denied states.
-- [ ] Validate build, lint, and the live GitHub Pages deployment.
-- [ ] Add an explicit, previewable import path if browser-local demo edits need to be migrated.
+- [ ] Verify anonymous access denial and permission-denied behavior.
+- [ ] Verify loading, empty, and recoverable network-error states.
+- [ ] Add an explicit, previewable import path if browser-local demo edits need migration.
 
 ## Phase 3 — Operational data and insights
 
-**Status: Planned**
+**Status: Deferred**
 
-- [ ] Add richer task filtering, sorting, and date-based views.
-- [ ] Add historical operational trends.
 - [ ] Move account data and activity history into the shared database.
+- [ ] Add richer task filtering, sorting, and date-based views.
+- [ ] Add historical operational trends and verified KPI reporting.
 - [ ] Expand KPI definitions, targets, and historical comparisons.
 - [ ] Make operational rules configurable.
 - [ ] Improve exception prioritization, assignment, and resolution workflows.
@@ -70,7 +71,7 @@ Progress is marked complete only when the implementation exists. Validation task
 
 ## Phase 4 — APIs and integrations
 
-**Status: Planned**
+**Status: Deferred**
 
 - [ ] Introduce a documented integration layer for external systems.
 - [ ] Explore CRM and customer-data integrations.
@@ -80,7 +81,7 @@ Progress is marked complete only when the implementation exists. Validation task
 
 ## Phase 5 — Workflow automation
 
-**Status: Planned**
+**Status: Future direction**
 
 - [ ] Define clear triggers, conditions, and actions.
 - [ ] Automate repetitive operational follow-ups.
@@ -90,12 +91,12 @@ Progress is marked complete only when the implementation exists. Validation task
 
 ## Phase 6 — Business intelligence
 
-**Status: Future**
+**Status: Future direction**
 
 - [ ] Build historical KPI reporting and trend analysis.
 - [ ] Add richer visualizations and operational reports.
 - [ ] Explore Power BI and executive reporting.
-- [ ] Connect reports to verified, shared operational data.
+- [ ] Connect reports only to verified, shared operational data.
 
 ---
 
@@ -103,21 +104,7 @@ Progress is marked complete only when the implementation exists. Validation task
 
 OpsFlow should move progressively from **showing what is happening** to identifying **what needs attention, who owns the next step, and what can safely be improved or automated**.
 
-```text
-Business Data
-    ↓
-Reliable Shared Workspace
-    ↓
-Operational Visibility
-    ↓
-Priorities & Exceptions
-    ↓
-Action & Accountability
-    ↓
-Automation
-    ↓
-Business Intelligence
-```
+The current release is a portfolio MVP. Future development should be driven by verified operational needs rather than adding complexity for its own sake.
 
 ## Guiding principle
 
