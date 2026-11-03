@@ -9,88 +9,81 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-The dashboard is deployed to GitHub Pages. Email/password authentication and shared workspace storage are implemented for tasks and operational exceptions using Supabase and PostgreSQL. Cross-user collaboration and workspace isolation still need validation with separate accounts and browser sessions.
+**Deployed frontend MVP · Maintenance mode · Shared-workspace validation outstanding**
 
-### Implemented
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
 
-- Responsive operations dashboard with a refined dark interface and subtle atmospheric background.
-- Task overview with owner, priority, due date, overdue state, search, status filters, and editable status.
+The repository's latest recorded GitHub Actions CI and Pages deployment runs succeeded on the current pre-closeout commit. This confirms the configured TypeScript/build/lint and deployment workflows at that revision; it does not establish live multi-user correctness or security.
+
+## Implemented
+
+- Responsive operations dashboard with task ownership, priorities, due dates, overdue states, search, and status filters.
 - Operational exception triage with severity, owner, description, and status updates.
-- Summary metrics for active tasks, overdue work, open exceptions, and tracked accounts.
-- KPI snapshot with target comparisons and direction-aware calculations.
-- Account health and recent activity panels.
-- Email/password sign-up, sign-in, sign-out, and workspace membership loading.
-- Supabase-backed task and exception reads and status updates, with workspace-level access policies.
-- Aster-inspired cursor ring and explicitly targeted magnetic interactions on supported desktop pointers.
+- Summary metrics and KPI comparisons.
+- Email/password sign-up, sign-in, sign-out, session refresh, and workspace membership loading.
+- Supabase-backed task and exception reads and status updates, scoped by workspace.
+- RLS policies for workspace membership, task/exception access, and role-based editing/deletion.
+- Viewer-role read-only controls in the interface and database policies.
 - Reduced-motion and touch-device handling.
 - GitHub Pages deployment configured for the `/opsflow/` project path.
+- GitHub Actions CI for TypeScript/production build and Oxlint.
 
 ## Data boundaries
 
-OpsFlow currently combines shared operational records with clearly illustrative dashboard data.
+OpsFlow combines shared operational records with illustrative dashboard data.
 
 | Area | Current source |
 | --- | --- |
-| Tasks and task status | Shared Supabase workspace |
-| Operational exceptions and status | Shared Supabase workspace |
+| Tasks and task status | Supabase workspace tables |
+| Operational exceptions and status | Supabase workspace tables |
 | Accounts and account health | Sample data |
-| KPIs and activity feed | Sample data |
+| KPIs and performance snapshot | Sample data |
+| Recent activity | Sample data |
 
-Metrics and activity based on sample records are for demonstration, not live business reporting. The dashboard does not yet provide real-time subscriptions, cross-session verification, or an import path for previous browser-local demo edits.
+Sample-based metrics and activity are for demonstration, not live business reporting. The app currently loads the first workspace membership returned for the signed-in user. Workspace switching, real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Roadmap
+## Validation still outstanding
 
-### Next — Reliability and workspace validation
-- [ ] Verify shared task and exception updates across two separate accounts and browser sessions.
-- [ ] Confirm workspace isolation and viewer-role restrictions.
-- [ ] Validate production build, lint, and GitHub Pages deployment.
-- [ ] Smoke-test responsive layouts, focus states, and status updates.
-- [ ] Add clear loading, empty, and recoverable error states where needed.
+- Test shared task and exception updates using two distinct accounts and browser sessions.
+- Verify a non-member cannot read or modify another workspace's records.
+- Verify viewer-role restrictions against the live Supabase project, including direct API requests.
+- Verify anonymous access is denied and inspect the deployed project's RLS configuration.
+- Smoke-test the live site on desktop and mobile, including keyboard focus and responsive layouts.
+- Verify loading, empty, network-error, and permission-denied behavior.
 
-### Then — More useful operations
-- [ ] Add richer task search, filtering, sorting, and date-based views.
-- [ ] Add a safe, previewable import flow for demo data when needed.
-- [ ] Move account and activity records to the shared database.
-- [ ] Add operational trends and configurable KPI targets.
-- [ ] Improve exception prioritization and ownership workflows.
-
-### Later — Integrations and intelligence
-- [ ] Connect CRM and other business systems through documented APIs.
-- [ ] Explore event-driven workflows, alerts, and automation.
-- [ ] Add historical reporting, trends, and business intelligence views.
-
-See [ROADMAP.md](./ROADMAP.md) for the full plan and [CHANGELOG.md](./CHANGELOG.md) for project history.
+Until these checks are completed, treat OpsFlow as a deployed portfolio MVP, not a production-validated multi-user operations system. Use sample data only; do not enter real customer, confidential, or sensitive business information.
 
 ## Technology
 
-- **React** and **TypeScript** — interface and typed domain models.
+- **React + TypeScript** — interface and typed domain models.
 - **Vite** — development server and production build.
 - **Oxlint** — code linting.
-- **Supabase / PostgreSQL** — authentication and shared task/exception storage.
-- **GitHub Actions / GitHub Pages** — deployment and hosting.
+- **Supabase Auth + PostgreSQL + RLS** — authentication and shared task/exception storage.
+- **GitHub Actions + GitHub Pages** — CI, deployment, and hosting.
 
 ## Local development
 
-Requirements: a compatible Node.js version and npm.
+Requirements: Node.js 22 or a compatible supported version, and npm.
 
 ```bash
-npm install
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Before publishing, run:
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` for authenticated workspace functionality. Run the checks before publishing:
 
 ```bash
 npm run build
 npm run lint
 ```
 
-## Deployment notes
+## Deployment and credential safety
 
-The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path, and `index.html` uses a relative module entry so production assets resolve under the GitHub Pages project URL.
+The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path.
 
-Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supabase. Only the public project URL and publishable/anon key belong in frontend configuration. **Never put a Supabase service-role key in browser code or commit it to the repository.**
+Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supabase. Only the public project URL and publishable/anon key belong in frontend configuration. **Never put a Supabase service-role key in browser code, `VITE_*` variables, or the repository.** RLS—not secrecy of the public client key—must protect workspace data.
 
-## Why this project exists
+## Project history
 
-OpsFlow is both a practical business-operations product and a structured software-learning project. It is built in small increments, with a preference for understanding the data and business rules before adding more complexity.
+See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
