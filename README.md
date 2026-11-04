@@ -87,3 +87,7 @@ Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supab
 ## Project history
 
 See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
+
+## Documentation review — 2026-11-03
+
+Documentation review — 2026-11-03: OpsFlow remains a deployed portfolio MVP in maintenance mode. Authentication and workspace-scoped task/exception reads and status updates are implemented through Supabase, with RLS policies documented. Accounts, KPIs, and recent activity remain sample data. Multi-account isolation, viewer permissions, anonymous denial, and live responsive/accessibility checks still require external validation.
