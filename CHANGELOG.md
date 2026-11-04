@@ -81,3 +81,10 @@ The dashboard is deployed. Cross-user shared updates, workspace isolation, and t
 OpsFlow is a practical learning project focused on business operations, structured data, KPI reporting, task visibility, and exception handling.
 
 **Learn → Build → Test → Understand → Improve → Repeat**
+
+## [0.4.0] — Documentation synchronization — 2026-11-03
+
+### Updated
+- Refreshed README and roadmap to distinguish implemented Supabase task/exception functionality from sample account, KPI, and activity data.
+- Made the remaining two-account, workspace-isolation, viewer-permission, anonymous-access, and live UI validation tasks explicit.
+- Reaffirmed maintenance mode pending external validation.
