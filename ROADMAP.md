@@ -111,3 +111,11 @@ The current release is a portfolio MVP. Future development should be driven by v
 > **Start with the data. Turn it into information. Turn information into action.**
 
 Build in small steps, verify each milestone, and introduce complexity only when it solves a real operational problem.
+
+---
+
+Review date: 2026-11-03
+
+## Current direction — 2026-11-03
+
+**Deployed portfolio MVP · Maintenance mode pending external validation.** The next meaningful milestone is validation, not feature expansion: test shared task/exception updates with two accounts, verify cross-workspace isolation and viewer restrictions through direct API requests, confirm anonymous denial and live RLS configuration, then smoke-test responsive, keyboard, loading, empty, and error states. Do not claim production readiness until these checks pass.
