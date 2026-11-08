@@ -88,6 +88,10 @@ Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supab
 
 See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
 
-## Documentation review — 2026-11-03
+## Documentation review — 2026-11-08
 
-Documentation review — 2026-11-03: OpsFlow remains a deployed portfolio MVP in maintenance mode. Authentication and workspace-scoped task/exception reads and status updates are implemented through Supabase, with RLS policies documented. Accounts, KPIs, and recent activity remain sample data. Multi-account isolation, viewer permissions, anonymous denial, and live responsive/accessibility checks still require external validation.
+OpsFlow remains a deployed portfolio MVP in maintenance mode. The latest recorded CI and GitHub Pages deployment workflows both succeeded on 2026-11-04 (commit `6a8d417`). No later application feature work is represented as completed by this documentation refresh.
+
+Implemented scope remains email/password authentication, workspace membership loading, and Supabase-backed, workspace-scoped task and operational-exception reads/status updates, with role-aware UI controls and RLS policies in the repository. Accounts, KPI snapshots, and recent activity remain sample data. The app currently loads the first returned workspace membership; workspace switching, realtime subscriptions, and persistence for accounts/KPIs/activity are not implemented.
+
+External validation is still required for two-account shared updates, cross-workspace isolation, viewer restrictions via direct API requests, anonymous denial, live RLS configuration, and deployed responsive/keyboard/error-state behavior. The project is not production-validated; use sample data only.
