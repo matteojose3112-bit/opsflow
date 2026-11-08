@@ -1,4 +1,10 @@
-# [0.5.0] — Documentation and CI status reconciliation — 2026-11-08
+# Changelog
+
+Notable OpsFlow changes. Completed implementation and pending validation are recorded separately.
+
+---
+
+## [0.5.0] — Documentation and CI status reconciliation — 2026-11-08
 
 ### Updated
 - Refreshed the README and roadmap review dates and recorded the latest successful CI and GitHub Pages deployment runs (2026-11-04, commit `6a8d417`).
@@ -8,9 +14,7 @@
 
 ---
 
-# Changelog
 
-Notable OpsFlow changes. Completed implementation and pending validation are recorded separately.
 
 ---
 
