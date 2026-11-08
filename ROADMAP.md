@@ -114,8 +114,19 @@ Build in small steps, verify each milestone, and introduce complexity only when 
 
 ---
 
-Review date: 2026-11-03
 
-## Current direction — 2026-11-03
+---
 
-**Deployed portfolio MVP · Maintenance mode pending external validation.** The next meaningful milestone is validation, not feature expansion: test shared task/exception updates with two accounts, verify cross-workspace isolation and viewer restrictions through direct API requests, confirm anonymous denial and live RLS configuration, then smoke-test responsive, keyboard, loading, empty, and error states. Do not claim production readiness until these checks pass.
+Review date: 2026-11-08
+
+## Current direction — 2026-11-08
+
+**Deployed portfolio MVP · Maintenance mode pending external validation.** The latest recorded CI and GitHub Pages deployment workflows succeeded on 2026-11-04 (commit `6a8d417`). The implementation scope is unchanged: Supabase-backed, workspace-scoped tasks and operational exceptions; sample account, KPI, and activity data.
+
+Next work is validation rather than feature expansion:
+- [ ] Verify shared task/exception updates with two distinct accounts and browser sessions.
+- [ ] Verify cross-workspace isolation, viewer restrictions, and anonymous denial against the live Supabase project, including direct API requests.
+- [ ] Confirm the deployed project's RLS policies and auth redirect configuration.
+- [ ] Smoke-test desktop/mobile layouts, keyboard focus, loading, empty, network-error, and permission-denied states.
+
+Do not claim production readiness until these checks pass. Keep service-role credentials out of browser code and use sample data only.
