@@ -1,3 +1,13 @@
+# [0.5.0] — Documentation and CI status reconciliation — 2026-11-08
+
+### Updated
+- Refreshed the README and roadmap review dates and recorded the latest successful CI and GitHub Pages deployment runs (2026-11-04, commit `6a8d417`).
+- Reconfirmed that Supabase-backed task and exception workflows are implemented while accounts, KPI snapshots, and recent activity remain sample data.
+- Kept multi-account, workspace-isolation, viewer-role, anonymous-access, and manual UI validation as open checks.
+- No application functionality or Supabase production configuration changed.
+
+---
+
 # Changelog
 
 Notable OpsFlow changes. Completed implementation and pending validation are recorded separately.
