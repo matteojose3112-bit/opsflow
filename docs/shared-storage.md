@@ -41,9 +41,33 @@ Tasks and exceptions are scoped by `workspace_id`. RLS policies limit authentica
 - The current app signs in with email/password, loads the first workspace membership returned for the authenticated user, reads tasks and exceptions from Supabase, and saves status changes remotely. It does not import the browser's old demo edits. The dashboard's account, KPI, and activity panels remain sample data because those tables are not in this initial schema.
 - Session tokens are stored in browser local storage. Treat this as a client-side security trade-off and do not use the app for sensitive production records until the deployment and threat model have been reviewed.
 
+## Static policy review — 2026-11-12
+
+A repository-only review of `supabase/migrations/202610180001_shared_workspace.sql` found:
+
+- RLS is enabled on all four application tables: `workspaces`, `workspace_members`, `tasks`, and `operational_exceptions`.
+- The membership/role helper functions use `SECURITY DEFINER`, an empty `search_path`, and schema-qualified table references. Execute permission is revoked from `PUBLIC` and granted to `authenticated`.
+- Workspace and operational-record reads are scoped through workspace membership.
+- Task and exception inserts/updates require an owner, admin, or member role; viewer is excluded. Deletes are restricted to admin/owner roles.
+- The migration does not define anonymous-role access policies for these tables.
+
+### Follow-up security finding — GitHub issue #8
+
+The same static review identified two related policy gaps that need correction before live role validation:
+
+1. The `Owners and admins can change member roles` policy does not prevent an admin from changing their own membership role to `owner`, or from assigning `owner` to another member.
+2. The `Owners and admins can update workspaces` policy does not protect `workspaces.owner_id` from being changed by an admin.
+
+See [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8) for the finding, proposed remediation, and regression-test cases. These are conclusions from policy definitions, not results of authenticated API tests. They have not been confirmed against the hosted Supabase project.
+
+Recommended design: make ownership transfer an explicit owner-only operation; prevent admins from editing the owner membership or assigning the owner role; and keep `owner_id` out of ordinary admin workspace updates. Implement and test the correction against a disposable Supabase project before applying any production migration.
+
+This is a static review of the checked-in SQL only. It does **not** confirm that the migration has been applied to the hosted Supabase project, that deployed policies match this file, or that runtime requests are denied/allowed as intended. The public website's unauthenticated sign-in screen was browser-checked, but no authenticated credentials or live database access were used.
+
 ## Validation checklist
 
 - [x] Add SQL migration for workspace and operational tables with RLS policies.
+- [ ] Correct admin-to-owner role escalation and workspace ownership update policies (tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8)).
 - [ ] Verify anonymous requests cannot read or modify workspace data.
 - [ ] Verify a workspace member can read and update that workspace's tasks/exceptions.
 - [ ] Verify a non-member cannot access another workspace's records.

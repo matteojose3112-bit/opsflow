@@ -4,6 +4,47 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [0.5.2] — Workspace ownership policy review — 2026-11-12
+
+### Identified
+- Static review of the checked-in RLS migration found that the admin membership-role update policy does not explicitly prevent assignment of the owner role, including a possible admin self-promotion.
+- The workspace update policy does not explicitly protect workspaces.owner_id from admin updates.
+- Opened [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8) with remediation guidance and required regression tests.
+- Updated README, roadmap, and shared-storage documentation to make the security finding and validation boundary visible.
+
+### Status
+- Static policy finding only; no authenticated API test or hosted Supabase inspection has been performed.
+- No application code, database migration, hosted configuration, or deployment changed.
+- Keep production-readiness claims blocked until the policy is corrected and regression-tested.
+
+---
+
+## [0.5.1] — Validation checkpoint — 2026-11-12
+
+### Verified
+- PR #7 build-and-lint CI passed on its head commit (workflow run 43335649717).
+- The public GitHub Pages entry route rendered the unauthenticated sign-in screen in a live browser check, with no visible browser errors or failed assets.
+- Completed a static source review of the workspace RLS migration; findings and limitations are recorded in docs/shared-storage.md.
+
+### Still outstanding
+- Authenticated task and exception reads/writes against the configured Supabase project.
+- Anonymous denial, cross-workspace isolation, viewer-role restrictions, and two-account shared updates.
+- Authenticated desktop/mobile, keyboard, loading, empty, and error-state checks.
+
+No application code, database migration, hosted Supabase configuration, or deployment changed in this checkpoint.
+
+---
+
+## [0.5.0] — Documentation and CI status reconciliation — 2026-11-08
+
+### Updated
+- Refreshed the README and roadmap review dates and recorded the latest successful CI and GitHub Pages deployment runs (2026-11-04, commit 6a8d417).
+- Reconfirmed that Supabase-backed task and exception workflows are implemented while accounts, KPI snapshots, and recent activity remain sample data.
+- Kept multi-account, workspace-isolation, viewer-role, anonymous-access, and manual UI validation as open checks.
+- No application functionality or Supabase production configuration changed.
+
+---
+
 ## [0.3.0] — MVP Closeout & Maintenance Mode
 
 ### Clarified
@@ -59,7 +100,7 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Added email/password sign-up, sign-in, sign-out, and authenticated workspace loading.
 - Connected task and exception reads and status updates to Supabase.
 - Added GitHub Actions build configuration for the public Supabase URL and publishable key.
-- Corrected the GitHub Pages entry-script path so the application loads from the `/opsflow/` project URL.
+- Corrected the GitHub Pages entry-script path so the application loads from the /opsflow/ project URL.
 - Added Aster-inspired cursor and magnetic interactions.
 
 ### Validation status
@@ -75,7 +116,7 @@ The dashboard is deployed. Cross-user shared updates, workspace isolation, and t
 - Installed dependencies and confirmed the initial application preview worked.
 - Added the initial project roadmap and changelog.
 - Selected Oxlint during setup.
-- Committed and pushed the foundation to the `main` branch.
+- Committed and pushed the foundation to the main branch.
 
 ### Project direction
 OpsFlow is a practical learning project focused on business operations, structured data, KPI reporting, task visibility, and exception handling.

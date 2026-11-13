@@ -10,7 +10,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Current milestone — Deployed MVP closeout
 
-**Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation remains outstanding.**
+**Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation and security remediation remain outstanding.**
 
 - [x] Build the responsive operations dashboard and core task/exception views.
 - [x] Add task search, status filters, overdue calculations, and KPI snapshot calculations.
@@ -21,6 +21,8 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Configure GitHub Actions CI for TypeScript/production build and Oxlint.
 - [x] Configure GitHub Pages deployment for the `/opsflow/` project path.
 - [x] Document implemented scope, sample-data boundaries, and credential safety.
+- [x] Record the static ownership-policy finding in [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8).
+- [ ] Correct admin self-promotion to owner and admin changes to `workspaces.owner_id`; add regression tests.
 - [ ] Verify shared updates with two separate accounts and browser sessions.
 - [ ] Verify workspace isolation and viewer restrictions with direct API requests.
 - [ ] Verify anonymous access is denied in the configured Supabase project.
@@ -41,7 +43,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Phase 2 — Authentication and shared workspace integration
 
-**Status: Implemented in code; live security and multi-user validation pending**
+**Status: Implemented in code; security remediation and live validation pending**
 
 - [x] Design PostgreSQL tables for workspaces, members, tasks, and operational exceptions.
 - [x] Add row-level security policies for authenticated workspace access.
@@ -51,6 +53,7 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Save task and exception status changes to shared storage.
 - [x] Restrict task and exception editing for viewer-role members in the UI and database policies.
 - [x] Document Supabase setup and frontend credential safety.
+- [ ] Restrict owner-role assignment and workspace ownership changes to an explicit owner-only flow (issue #8).
 - [ ] Verify shared updates with two separate accounts and browser sessions.
 - [ ] Confirm workspace isolation and viewer restrictions under real test accounts.
 - [ ] Verify anonymous access denial and permission-denied behavior.
@@ -114,8 +117,18 @@ Build in small steps, verify each milestone, and introduce complexity only when 
 
 ---
 
-Review date: 2026-11-03
+Review date: 2026-11-12
 
-## Current direction — 2026-11-03
+## Current direction — 2026-11-12
 
-**Deployed portfolio MVP · Maintenance mode pending external validation.** The next meaningful milestone is validation, not feature expansion: test shared task/exception updates with two accounts, verify cross-workspace isolation and viewer restrictions through direct API requests, confirm anonymous denial and live RLS configuration, then smoke-test responsive, keyboard, loading, empty, and error states. Do not claim production readiness until these checks pass.
+**Deployed portfolio MVP · Maintenance mode pending security remediation and external validation.** PR #7's build-and-lint CI passed on 2026-11-12. The public sign-in screen was browser-checked; authenticated and live database validation remain open. The implementation scope is unchanged: Supabase-backed, workspace-scoped tasks and operational exceptions; sample account, KPI, and activity data.
+
+The static SQL review identified an ownership-boundary issue: admins can potentially assign the owner role and modify `workspaces.owner_id`. See [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8). This has not been tested against the hosted project.
+
+Next work is security remediation and validation, not feature expansion:
+- [ ] Correct the role/ownership policies and add regression tests.
+- [ ] Verify anonymous denial, cross-workspace isolation, viewer restrictions, and two-account shared updates against a disposable/test Supabase project.
+- [ ] Confirm the deployed project's RLS policies and auth redirect configuration.
+- [ ] Smoke-test desktop/mobile layouts, keyboard focus, loading, empty, network-error, and permission-denied states.
+
+Do not claim production readiness until these checks pass. Keep service-role credentials out of browser code and use sample data only.

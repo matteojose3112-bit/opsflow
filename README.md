@@ -9,11 +9,11 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-**Deployed frontend MVP · Maintenance mode · Shared-workspace validation outstanding**
+**Deployed frontend MVP · Maintenance mode · Security remediation and shared-workspace validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. The checked-in database migration defines row-level security (RLS) policies, but static inspection identified an ownership-boundary issue tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8).
 
-The repository's latest recorded GitHub Actions CI and Pages deployment runs succeeded on the current pre-closeout commit. This confirms the configured TypeScript/build/lint and deployment workflows at that revision; it does not establish live multi-user correctness or security.
+The documentation pull request's CI passed on 2026-11-12. The public unauthenticated sign-in screen was browser-checked. Neither result establishes live multi-user correctness or hosted Supabase security.
 
 ## Implemented
 
@@ -42,8 +42,12 @@ OpsFlow combines shared operational records with illustrative dashboard data.
 
 Sample-based metrics and activity are for demonstration, not live business reporting. The app currently loads the first workspace membership returned for the signed-in user. Workspace switching, real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Validation still outstanding
+## Security finding and validation still outstanding
 
+A static review of the checked-in RLS migration found that admins may be able to promote themselves or another member to `owner`, and may be able to change `workspaces.owner_id`. This is tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow). No live authenticated test has been performed, and the hosted Supabase configuration has not been verified.
+
+Remaining checks:
+- Correct owner-role assignment and workspace ownership policies, then add regression tests.
 - Test shared task and exception updates using two distinct accounts and browser sessions.
 - Verify a non-member cannot read or modify another workspace's records.
 - Verify viewer-role restrictions against the live Supabase project, including direct API requests.
@@ -88,6 +92,8 @@ Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supab
 
 See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
 
-## Documentation review — 2026-11-03
+## Documentation and validation review — 2026-11-12
 
-Documentation review — 2026-11-03: OpsFlow remains a deployed portfolio MVP in maintenance mode. Authentication and workspace-scoped task/exception reads and status updates are implemented through Supabase, with RLS policies documented. Accounts, KPIs, and recent activity remain sample data. Multi-account isolation, viewer permissions, anonymous denial, and live responsive/accessibility checks still require external validation.
+The latest PR CI build-and-lint job passed. A live unauthenticated browser smoke check confirmed that the public GitHub Pages URL renders the sign-in screen without visible browser errors or failed assets. This validates the entry route only, not authenticated dashboard behavior.
+
+The repository-only RLS review and its limitations are recorded in [docs/shared-storage.md](./docs/shared-storage.md). It also identified the ownership-policy finding tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow). No application code, migration, hosted Supabase configuration, or deployment was changed in this documentation checkpoint.
