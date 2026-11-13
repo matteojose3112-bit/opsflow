@@ -114,14 +114,11 @@ Build in small steps, verify each milestone, and introduce complexity only when 
 
 ---
 
+Review date: 2026-11-12
 
----
+## Current direction — 2026-11-12
 
-Review date: 2026-11-08
-
-## Current direction — 2026-11-08
-
-**Deployed portfolio MVP · Maintenance mode pending external validation.** The latest recorded CI and GitHub Pages deployment workflows succeeded on 2026-11-04 (commit `6a8d417`). The implementation scope is unchanged: Supabase-backed, workspace-scoped tasks and operational exceptions; sample account, KPI, and activity data.
+**Deployed portfolio MVP · Maintenance mode pending external validation.** PR #7's build-and-lint CI passed on 2026-11-12 (head `c0c7e64`). The latest recorded main-branch GitHub Pages deployment remains 2026-11-04 (commit `6a8d417`). A browser smoke check confirmed the public sign-in screen loads without visible errors; authenticated and live database validation remain open. The implementation scope is unchanged: Supabase-backed, workspace-scoped tasks and operational exceptions; sample account, KPI, and activity data.
 
 Next work is validation rather than feature expansion:
 - [ ] Verify shared task/exception updates with two distinct accounts and browser sessions.
@@ -130,3 +127,11 @@ Next work is validation rather than feature expansion:
 - [ ] Smoke-test desktop/mobile layouts, keyboard focus, loading, empty, network-error, and permission-denied states.
 
 Do not claim production readiness until these checks pass. Keep service-role credentials out of browser code and use sample data only.
+
+### Validation checkpoint — 2026-11-12
+- [x] Verify PR #7 build-and-lint CI on its head commit (`c0c7e64`).
+- [x] Verify the public GitHub Pages entry route displays the unauthenticated sign-in screen without visible browser errors.
+- [x] Perform a static review of the repository RLS migration; record scope and limitations in `docs/shared-storage.md`.
+- [ ] Verify authenticated task/exception reads and writes against the configured Supabase project.
+- [ ] Verify anonymous denial, cross-workspace isolation, and viewer restrictions through direct API requests.
+- [ ] Verify two-account shared updates and the authenticated desktop/mobile experience.
