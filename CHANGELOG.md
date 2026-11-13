@@ -4,6 +4,22 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [0.5.1] — Validation checkpoint — 2026-11-12
+
+### Verified
+- PR #7 build-and-lint CI passed on head commit `c0c7e64` (workflow run `42501872893`).
+- The public GitHub Pages entry route rendered the unauthenticated sign-in screen in a live browser check, with no visible browser errors or failed assets.
+- Completed a static source review of the workspace RLS migration; findings and limitations are recorded in `docs/shared-storage.md`.
+
+### Still outstanding
+- Authenticated task and exception reads/writes against the configured Supabase project.
+- Anonymous denial, cross-workspace isolation, viewer-role restrictions, and two-account shared updates.
+- Authenticated desktop/mobile, keyboard, loading, empty, and error-state checks.
+
+No application code, database migration, hosted Supabase configuration, or deployment changed in this checkpoint.
+
+---
+
 ## [0.5.0] — Documentation and CI status reconciliation — 2026-11-08
 
 ### Updated
@@ -11,10 +27,6 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Reconfirmed that Supabase-backed task and exception workflows are implemented while accounts, KPI snapshots, and recent activity remain sample data.
 - Kept multi-account, workspace-isolation, viewer-role, anonymous-access, and manual UI validation as open checks.
 - No application functionality or Supabase production configuration changed.
-
----
-
-
 
 ---
 
