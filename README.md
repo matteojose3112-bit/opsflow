@@ -9,11 +9,11 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-**Deployed frontend MVP · Maintenance mode · Shared-workspace validation outstanding**
+**Deployed frontend MVP · Maintenance mode · Security remediation and shared-workspace validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. The checked-in database migration defines row-level security (RLS) policies, but static inspection identified an ownership-boundary issue tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow/issues/8).
 
-The latest recorded main-branch CI and Pages deployment runs succeeded on 2026-11-04 (commit `6a8d417`). The documentation pull request's CI also passed on 2026-11-12 (head `c0c7e64`), confirming its TypeScript/build/lint job. This does not establish live multi-user correctness or security.
+The documentation pull request's CI passed on 2026-11-12. The public unauthenticated sign-in screen was browser-checked. Neither result establishes live multi-user correctness or hosted Supabase security.
 
 ## Implemented
 
@@ -42,8 +42,12 @@ OpsFlow combines shared operational records with illustrative dashboard data.
 
 Sample-based metrics and activity are for demonstration, not live business reporting. The app currently loads the first workspace membership returned for the signed-in user. Workspace switching, real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Validation still outstanding
+## Security finding and validation still outstanding
 
+A static review of the checked-in RLS migration found that admins may be able to promote themselves or another member to `owner`, and may be able to change `workspaces.owner_id`. This is tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow). No live authenticated test has been performed, and the hosted Supabase configuration has not been verified.
+
+Remaining checks:
+- Correct owner-role assignment and workspace ownership policies, then add regression tests.
 - Test shared task and exception updates using two distinct accounts and browser sessions.
 - Verify a non-member cannot read or modify another workspace's records.
 - Verify viewer-role restrictions against the live Supabase project, including direct API requests.
@@ -90,10 +94,6 @@ See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verificatio
 
 ## Documentation and validation review — 2026-11-12
 
-OpsFlow remains a deployed portfolio MVP in maintenance mode. The PR #7 CI build-and-lint job passed on 2026-11-12. The latest recorded main-branch GitHub Pages deployment remains 2026-11-04 (commit `6a8d417`); this documentation update does not claim a new deployment.
+The latest PR CI build-and-lint job passed. A live unauthenticated browser smoke check confirmed that the public GitHub Pages URL renders the sign-in screen without visible browser errors or failed assets. This validates the entry route only, not authenticated dashboard behavior.
 
-A live unauthenticated browser smoke check confirmed that the public GitHub Pages URL renders the sign-in screen without visible browser errors or failed assets. This validates the entry route only, not authenticated dashboard behavior. A static review of the repository's RLS migration found membership-scoped read policies and role-gated write policies; the hosted Supabase configuration still requires direct verification. See [docs/shared-storage.md](./docs/shared-storage.md) for the review boundary and remaining checks.
-
-Implemented scope remains email/password authentication, workspace membership loading, and Supabase-backed, workspace-scoped task and operational-exception reads/status updates, with role-aware UI controls and RLS policies in the repository. Accounts, KPI snapshots, and recent activity remain sample data. The app currently loads the first returned workspace membership; workspace switching, realtime subscriptions, and persistence for accounts/KPIs/activity are not implemented.
-
-External validation is still required for two-account shared updates, cross-workspace isolation, viewer restrictions via direct API requests, anonymous denial, confirmation of the deployed RLS migration and auth settings, and deployed responsive/keyboard/loading/error-state behavior. The project is not production-validated; use sample data only.
+The repository-only RLS review and its limitations are recorded in [docs/shared-storage.md](./docs/shared-storage.md). It also identified the ownership-policy finding tracked in [issue #8](https://github.com/matteojose3112-bit/opsflow). No application code, migration, hosted Supabase configuration, or deployment was changed in this documentation checkpoint.
