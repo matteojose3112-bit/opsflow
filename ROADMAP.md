@@ -49,12 +49,14 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Load the authenticated user's workspace and membership role.
 - [x] Read tasks and exceptions from Supabase.
 - [x] Save task and exception status changes to shared storage.
+- [x] Require a returned row representation and verify the exact record ID and persisted status before reflecting a successful task or exception update.
+- [x] Add automated regression tests for empty, malformed, mismatched, and multi-row mutation responses; run them in CI.
 - [x] Restrict task and exception editing for viewer-role members in the UI and database policies.
 - [x] Document Supabase setup and frontend credential safety.
 - [ ] Verify shared updates with two separate accounts and browser sessions.
 - [ ] Confirm workspace isolation and viewer restrictions under real test accounts.
 - [ ] Verify anonymous access denial and permission-denied behavior.
-- [ ] Verify loading, empty, and recoverable network-error states.
+- [ ] Verify loading, empty, and recoverable network-error states, including the visible recovery path after a rejected remote status update.
 - [ ] Add an explicit, previewable import path if browser-local demo edits need migration.
 
 ## Phase 3 — Operational data and insights
