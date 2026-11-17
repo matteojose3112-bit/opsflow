@@ -83,9 +83,28 @@ begin
       using errcode = '42501';
   end if;
 
-  if new_owner_id = current_owner_id then
-    raise exception 'The new owner is already the current owner'
+  if new_owner_id is null or new_owner_id = current_owner_id then
+    raise exception 'A different, non-null new owner is required'
       using errcode = '22023';
+  end if;
+
+  -- Lock both membership rows so a concurrent member removal cannot leave the
+  -- workspace owner_id and owner membership out of sync during the transfer.
+  perform 1
+    from public.workspace_members as wm
+   where wm.workspace_id = target_workspace_id
+     and wm.user_id in (current_owner_id, new_owner_id)
+   order by wm.user_id
+   for update;
+
+  if not exists (
+    select 1
+      from public.workspace_members as wm
+     where wm.workspace_id = target_workspace_id
+       and wm.user_id = current_owner_id
+  ) then
+    raise exception 'The current owner must have a workspace membership'
+      using errcode = '23503';
   end if;
 
   if not exists (
