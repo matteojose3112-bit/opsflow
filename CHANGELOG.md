@@ -16,7 +16,7 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ### Validation status
 - The application build/lint CI passed on an intermediate security-branch commit.
-- The new database-test workflow has not yet reported a result; the SQL migration and pgTAP suite remain unverified until that workflow completes.
+- The dedicated database-test workflow passed all 19 pgTAP assertions against a disposable local Supabase database; the local stack also shut down successfully.
 - Hosted Supabase configuration, authenticated direct-API behavior, and production rollout remain unverified.
 - No hosted database or deployment was changed.
 
