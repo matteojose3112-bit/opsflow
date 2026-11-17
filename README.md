@@ -9,11 +9,11 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-**Deployed frontend MVP · Maintenance mode · Shared-workspace validation outstanding**
+**Deployed frontend MVP · Security hardening in progress · Production validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. The database regression suite has passed all 19 pgTAP assertions against a disposable local Supabase stack. The migration has not been applied to the hosted Supabase project.
 
-The repository's latest recorded GitHub Actions CI and Pages deployment runs succeeded on the current pre-closeout commit. This confirms the configured TypeScript/build/lint and deployment workflows at that revision; it does not establish live multi-user correctness or security.
+The latest GitHub Actions build/lint check and dedicated database-test workflow both passed. The latter applied the migrations to a disposable local Supabase database and passed all 19 pgTAP assertions. These checks do not establish live multi-user correctness or production security.
 
 ## Implemented
 
@@ -22,11 +22,23 @@ The repository's latest recorded GitHub Actions CI and Pages deployment runs suc
 - Summary metrics and KPI comparisons.
 - Email/password sign-up, sign-in, sign-out, session refresh, and workspace membership loading.
 - Supabase-backed task and exception reads and status updates, scoped by workspace.
-- RLS policies for workspace membership, task/exception access, and role-based editing/deletion.
+- Existing RLS policies for workspace membership, task/exception access, and role-based editing/deletion.
 - Viewer-role read-only controls in the interface and database policies.
 - Reduced-motion and touch-device handling.
 - GitHub Pages deployment configured for the `/opsflow/` project path.
 - GitHub Actions CI for TypeScript/production build and Oxlint.
+
+## Security hardening branch
+
+The branch `fix/workspace-ownership-authorization` adds:
+
+- An additive migration that preserves owner/admin workspace-name editing while column-level grants prevent ordinary clients from changing `owner_id`.
+- Column-level grants and membership policies that prevent generic CRUD from reassigning member identities, promoting users to owner, or changing/removing the owner membership.
+- A dedicated `transfer_workspace_ownership(workspace_id, new_owner_id)` database function. Only the current owner can use it; the new owner must already be a workspace member, and the former owner becomes an admin.
+- pgTAP regression coverage for admin self-promotion, admin promotion of another member, owner-id changes, membership reassignment, permitted admin metadata/role updates, explicit ownership transfer, viewer restrictions, and non-member isolation.
+- A local Supabase configuration and GitHub Actions workflow for running the database regression suite on relevant pull requests.
+
+This is code-level remediation only. Apply and test it against a disposable Supabase database before considering any hosted rollout. See [docs/shared-storage.md](./docs/shared-storage.md).
 
 ## Data boundaries
 
@@ -44,12 +56,12 @@ Sample-based metrics and activity are for demonstration, not live business repor
 
 ## Validation still outstanding
 
-- Test shared task and exception updates using two distinct accounts and browser sessions.
+- Repeat the database suite after future schema or policy changes; validate direct API behavior with distinct authenticated identities.
+- Verify hosted API behavior with distinct authenticated owner/admin/member/viewer identities.
 - Verify a non-member cannot read or modify another workspace's records.
-- Verify viewer-role restrictions against the live Supabase project, including direct API requests.
 - Verify anonymous access is denied and inspect the deployed project's RLS configuration.
-- Smoke-test the live site on desktop and mobile, including keyboard focus and responsive layouts.
-- Verify loading, empty, network-error, and permission-denied behavior.
+- Test shared task and exception updates using two distinct accounts and browser sessions.
+- Smoke-test the live site on desktop and mobile, including keyboard focus, loading, empty, network-error, and permission-denied states.
 
 Until these checks are completed, treat OpsFlow as a deployed portfolio MVP, not a production-validated multi-user operations system. Use sample data only; do not enter real customer, confidential, or sensitive business information.
 
@@ -78,6 +90,16 @@ npm run build
 npm run lint
 ```
 
+To run database regression tests locally, install the Supabase CLI and Docker, then run:
+
+```bash
+supabase start
+supabase test db
+supabase stop --no-backup
+```
+
+The dedicated GitHub Actions database-test workflow runs the same migration and pgTAP checks for pull requests that change `supabase/**`.
+
 ## Deployment and credential safety
 
 The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path.
@@ -87,7 +109,3 @@ Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supab
 ## Project history
 
 See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
-
-## Documentation review — 2026-11-03
-
-Documentation review — 2026-11-03: OpsFlow remains a deployed portfolio MVP in maintenance mode. Authentication and workspace-scoped task/exception reads and status updates are implemented through Supabase, with RLS policies documented. Accounts, KPIs, and recent activity remain sample data. Multi-account isolation, viewer permissions, anonymous denial, and live responsive/accessibility checks still require external validation.
