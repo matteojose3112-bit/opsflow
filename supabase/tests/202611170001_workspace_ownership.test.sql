@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select extensions.plan(16);
+select extensions.plan(19);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -69,17 +69,31 @@ select extensions.is(
   'member role remains unchanged after rejected promotion'
 );
 
-update public.workspaces
-   set owner_id = '10000000-0000-4000-8000-000000000002'
- where id = '20000000-0000-4000-8000-000000000001';
+select extensions.throws_ok(
+  $$update public.workspaces
+       set owner_id = '10000000-0000-4000-8000-000000000002'
+     where id = '20000000-0000-4000-8000-000000000001'$$,
+  '42501',
+  null,
+  'admin cannot update owner_id'
+);
 select extensions.is(
   (select owner_id::text from public.workspaces
     where id = '20000000-0000-4000-8000-000000000001'),
   '10000000-0000-4000-8000-000000000001',
-  'admin cannot change workspace owner_id'
+  'workspace owner remains unchanged after rejected admin update'
 );
 
--- Admins retain ordinary membership administration within the role boundary.
+update public.workspaces set name = 'Renamed by admin'
+ where id = '20000000-0000-4000-8000-000000000001';
+select extensions.is(
+  (select name from public.workspaces
+    where id = '20000000-0000-4000-8000-000000000001'),
+  'Renamed by admin',
+  'admin can still update permitted workspace metadata'
+);
+
+-- Admins retain role management, but cannot reassign a membership identity.
 update public.workspace_members set role = 'viewer'
  where workspace_id = '20000000-0000-4000-8000-000000000001'
    and user_id = '10000000-0000-4000-8000-000000000003';
@@ -89,6 +103,16 @@ select extensions.is(
       and user_id = '10000000-0000-4000-8000-000000000003'),
   'viewer',
   'admin can still assign a permitted non-owner role'
+);
+
+select extensions.throws_ok(
+  $$update public.workspace_members
+       set user_id = '10000000-0000-4000-8000-000000000005'
+     where workspace_id = '20000000-0000-4000-8000-000000000001'
+       and user_id = '10000000-0000-4000-8000-000000000003'$$,
+  '42501',
+  null,
+  'admin cannot reassign a membership to another user'
 );
 
 select extensions.throws_ok(
