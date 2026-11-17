@@ -26,7 +26,7 @@ jobs:
         with:
           version: latest
       - name: Start disposable local Supabase stack
-        run: supabase start -x studio,inbucket,imgproxy,edge-runtime,logflare,vector,analytics
+        run: supabase start -x studio,mailpit,imgproxy,edge-runtime,logflare,vector,postgres-meta,supavisor
       - name: Run database regression tests
         run: supabase test db
       - name: Stop local Supabase stack
