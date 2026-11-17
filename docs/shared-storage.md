@@ -21,8 +21,8 @@ The initial migration at `supabase/migrations/202610180001_shared_workspace.sql`
 
 The additive hardening migration at `supabase/migrations/202611170001_secure_workspace_ownership.sql` changes the authorization boundary:
 
-- Only the current workspace owner can update workspace metadata, and ordinary updates must retain the caller as `owner_id`.
-- Admins may manage non-owner memberships but cannot assign the `owner` role.
+- Owners/admins can update workspace names. Column-level grants prevent ordinary authenticated clients from changing `owner_id` or other workspace columns.
+- Owners/admins may update only the role column for non-owner memberships; member identity and workspace association cannot be changed through generic updates.
 - The owner membership cannot be changed or removed through generic membership CRUD.
 - Ownership transfer uses `public.transfer_workspace_ownership(workspace_id, new_owner_id)`. The caller must be the current owner, the recipient must already be a member, and the former owner becomes an admin.
 
@@ -49,7 +49,7 @@ supabase test db
 supabase stop --no-backup
 ```
 
-The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite on pull requests that change `supabase/**`. The tests check that admins cannot self-promote or promote another member to owner, cannot change `owner_id`, retain permitted non-owner membership administration, and that only the current owner can transfer ownership. They also check that the former owner becomes an admin, the new owner receives the owner role, viewers cannot change membership, and non-members cannot read the workspace.
+The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite on pull requests that change `supabase/**`. The tests check that admins cannot self-promote or promote another member to owner, cannot change `owner_id` or reassign member identities, retain permitted workspace-name and non-owner role management, and that only the current owner can transfer ownership. They also check that the former owner becomes an admin, the new owner receives the owner role, viewers cannot change membership, and non-members cannot read the workspace.
 
 ## Security and rollout rules
 
