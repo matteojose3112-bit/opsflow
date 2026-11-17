@@ -46,9 +46,10 @@ The SQL tests in `supabase/tests/202611170001_workspace_ownership.test.sql` use 
 ```bash
 supabase start
 supabase test db
+supabase stop --no-backup
 ```
 
-The suite checks that admins cannot self-promote or promote another member to owner, cannot change `owner_id`, retain permitted non-owner membership administration, and that only the current owner can transfer ownership. It also checks that the former owner becomes an admin, the new owner receives the owner role, viewers cannot change membership, and non-members cannot read the workspace.
+The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite on pull requests that change `supabase/**`. The tests check that admins cannot self-promote or promote another member to owner, cannot change `owner_id`, retain permitted non-owner membership administration, and that only the current owner can transfer ownership. They also check that the former owner becomes an admin, the new owner receives the owner role, viewers cannot change membership, and non-members cannot read the workspace.
 
 ## Security and rollout rules
 
@@ -64,6 +65,7 @@ The suite checks that admins cannot self-promote or promote another member to ow
 
 - [x] Add initial SQL migration for workspace and operational tables with RLS policies.
 - [x] Add a separate ownership-hardening migration and pgTAP regression test draft.
+- [x] Add a dedicated GitHub Actions workflow for local database regression tests.
 - [ ] Execute the database regression suite against a disposable Supabase database.
 - [ ] Verify anonymous requests cannot read or modify workspace data.
 - [ ] Verify a workspace member can read and update that workspace's tasks/exceptions.
