@@ -12,9 +12,11 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Added `transfer_workspace_ownership(workspace_id, new_owner_id)`, a narrowly scoped security-definer function that requires the current owner and an existing workspace member as the recipient.
 - Kept the former owner as an admin after a successful ownership transfer.
 - Added pgTAP regression tests for admin self-promotion, promotion of another member, owner-id protection, permitted admin membership management, explicit ownership transfer, viewer restrictions, and non-member visibility.
+- Added local Supabase configuration and a dedicated GitHub Actions workflow to run the database migration and pgTAP suite on relevant pull requests.
 
 ### Validation status
-- Migration and tests are committed to the security branch but have not yet been executed against a disposable Supabase database.
+- The application build/lint CI passed on an intermediate security-branch commit.
+- The new database-test workflow has not yet reported a result; the SQL migration and pgTAP suite remain unverified until that workflow completes.
 - Hosted Supabase configuration, authenticated direct-API behavior, and production rollout remain unverified.
 - No hosted database or deployment was changed.
 
