@@ -32,10 +32,10 @@ The existing GitHub Actions build/lint check passed on the latest security-branc
 
 The branch `fix/workspace-ownership-authorization` adds:
 
-- An additive migration that restricts ordinary workspace metadata updates to the current owner without allowing `owner_id` changes.
-- Membership insert/update/delete policies that prevent generic CRUD operations from creating, promoting, or removing the owner membership.
+- An additive migration that preserves owner/admin workspace-name editing while column-level grants prevent ordinary clients from changing `owner_id`.
+- Column-level grants and membership policies that prevent generic CRUD from reassigning member identities, promoting users to owner, or changing/removing the owner membership.
 - A dedicated `transfer_workspace_ownership(workspace_id, new_owner_id)` database function. Only the current owner can use it; the new owner must already be a workspace member, and the former owner becomes an admin.
-- pgTAP regression coverage for admin self-promotion, admin promotion of another member, direct owner-id changes, permitted admin membership management, explicit ownership transfer, viewer restrictions, and non-member isolation.
+- pgTAP regression coverage for admin self-promotion, admin promotion of another member, owner-id changes, membership reassignment, permitted admin metadata/role updates, explicit ownership transfer, viewer restrictions, and non-member isolation.
 - A local Supabase configuration and GitHub Actions workflow for running the database regression suite on relevant pull requests.
 
 This is code-level remediation only. Apply and test it against a disposable Supabase database before considering any hosted rollout. See [docs/shared-storage.md](./docs/shared-storage.md).
