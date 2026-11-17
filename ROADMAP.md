@@ -13,8 +13,8 @@ Progress is marked complete only when the implementation exists. External valida
 **Status: Remediation migration, regression-test suite, and CI workflow implemented on a separate branch; database execution pending.**
 
 - [x] Create a separate security branch without changing the docs-only PR.
-- [x] Restrict ordinary workspace metadata updates to the current owner and prevent generic `owner_id` changes.
-- [x] Prevent generic membership operations from promoting, changing, or removing the owner membership.
+- [x] Preserve owner/admin workspace-name updates while denying generic `owner_id` writes with column-level grants.
+- [x] Limit membership updates to the role column and prevent generic operations from reassigning member identities or promoting/changing/removing the owner membership.
 - [x] Add an explicit owner-only ownership-transfer function; require the recipient to already be a workspace member.
 - [x] Preserve the former owner's access as an admin after transfer.
 - [x] Add pgTAP regression tests for owner/admin/member/viewer and non-member boundaries.
