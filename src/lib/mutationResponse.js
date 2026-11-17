@@ -1,6 +1,6 @@
 const confirmationError = (recordLabel) =>
   new Error(
-    `${recordLabel} update was not confirmed by the server. The record may have changed or you may no longer have permission. Refresh the workspace and try again.`,
+    `${recordLabel} update was not confirmed by the server. The record may have changed or you may no longer have permission. Reload the page to reconcile the saved state, then try again.`,
   );
 
 /**
