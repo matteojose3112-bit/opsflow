@@ -11,9 +11,9 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 **Deployed frontend MVP · Security hardening in progress · Production validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. These changes have not been applied to the hosted Supabase project, and the database tests have not yet been executed.
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. The database regression suite has passed all 19 pgTAP assertions against a disposable local Supabase stack. The migration has not been applied to the hosted Supabase project.
 
-The existing GitHub Actions build/lint check passed on the latest security-branch revision. A new database-test workflow has been added to run the local Supabase migration and pgTAP suite; its first execution is still pending. Neither result establishes live multi-user correctness or production security.
+The latest GitHub Actions build/lint check and dedicated database-test workflow both passed. The latter applied the migrations to a disposable local Supabase database and passed all 19 pgTAP assertions. These checks do not establish live multi-user correctness or production security.
 
 ## Implemented
 
@@ -56,8 +56,8 @@ Sample-based metrics and activity are for demonstration, not live business repor
 
 ## Validation still outstanding
 
-- Run the new database-test workflow and resolve any migration or pgTAP failures.
-- Review the ownership migration and test behavior with authenticated owner/admin/member/viewer identities.
+- Repeat the database suite after future schema or policy changes; validate direct API behavior with distinct authenticated identities.
+- Verify hosted API behavior with distinct authenticated owner/admin/member/viewer identities.
 - Verify a non-member cannot read or modify another workspace's records.
 - Verify anonymous access is denied and inspect the deployed project's RLS configuration.
 - Test shared task and exception updates using two distinct accounts and browser sessions.
