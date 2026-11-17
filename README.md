@@ -13,7 +13,7 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. These changes have not been applied to the hosted Supabase project, and the database tests have not yet been executed.
 
-The previously recorded GitHub Actions CI and Pages deployment runs succeeded on earlier revisions. That evidence does not validate the new SQL migration, live multi-user correctness, or production security.
+The existing GitHub Actions build/lint check passed on the latest security-branch revision. A new database-test workflow has been added to run the local Supabase migration and pgTAP suite; its first execution is still pending. Neither result establishes live multi-user correctness or production security.
 
 ## Implemented
 
@@ -36,6 +36,7 @@ The branch `fix/workspace-ownership-authorization` adds:
 - Membership insert/update/delete policies that prevent generic CRUD operations from creating, promoting, or removing the owner membership.
 - A dedicated `transfer_workspace_ownership(workspace_id, new_owner_id)` database function. Only the current owner can use it; the new owner must already be a workspace member, and the former owner becomes an admin.
 - pgTAP regression coverage for admin self-promotion, admin promotion of another member, direct owner-id changes, permitted admin membership management, explicit ownership transfer, viewer restrictions, and non-member isolation.
+- A local Supabase configuration and GitHub Actions workflow for running the database regression suite on relevant pull requests.
 
 This is code-level remediation only. Apply and test it against a disposable Supabase database before considering any hosted rollout. See [docs/shared-storage.md](./docs/shared-storage.md).
 
@@ -55,8 +56,8 @@ Sample-based metrics and activity are for demonstration, not live business repor
 
 ## Validation still outstanding
 
-- Run `supabase test db` against a disposable local/test Supabase database with all migrations applied.
-- Review the ownership migration and pgTAP tests, then verify the behavior with authenticated owner/admin/member/viewer identities.
+- Run the new database-test workflow and resolve any migration or pgTAP failures.
+- Review the ownership migration and test behavior with authenticated owner/admin/member/viewer identities.
 - Verify a non-member cannot read or modify another workspace's records.
 - Verify anonymous access is denied and inspect the deployed project's RLS configuration.
 - Test shared task and exception updates using two distinct accounts and browser sessions.
@@ -89,11 +90,15 @@ npm run build
 npm run lint
 ```
 
-To run database regression tests, install the Supabase CLI, start a disposable local Supabase stack, apply migrations, and run:
+To run database regression tests locally, install the Supabase CLI and Docker, then run:
 
 ```bash
+supabase start
 supabase test db
+supabase stop --no-backup
 ```
+
+The dedicated GitHub Actions database-test workflow runs the same migration and pgTAP checks for pull requests that change `supabase/**`.
 
 ## Deployment and credential safety
 
