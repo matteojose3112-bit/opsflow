@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import App from './App';
 import type { OperationalException, Task, TaskStatus } from './types';
 import './AuthApp.css';
+import { confirmSingleUpdatedRow } from './lib/mutationResponse.js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
@@ -147,16 +148,20 @@ export default function AuthApp() {
   const updateTask = useCallback(async (taskId: string, status: TaskStatus) => {
     if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
     const active = await refreshSession(session);
-    await request(active, 'tasks?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(taskId),
-      { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status }) });
+    const rows = await request<Array<{ id: string; status: string }>>(active,
+      'tasks?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(taskId) + '&select=id,status',
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
+    confirmSingleUpdatedRow(rows, taskId, status, 'Task');
     setTasks(current => current.map(task => task.id === taskId ? { ...task, status } : task));
   }, [session, workspace, refreshSession]);
 
   const updateException = useCallback(async (exceptionId: string, status: OperationalException['status']) => {
     if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
     const active = await refreshSession(session);
-    await request(active, 'operational_exceptions?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(exceptionId),
-      { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status }) });
+    const rows = await request<Array<{ id: string; status: string }>>(active,
+      'operational_exceptions?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(exceptionId) + '&select=id,status',
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
+    confirmSingleUpdatedRow(rows, exceptionId, status, 'Exception');
     setExceptions(current => current.map(item => item.id === exceptionId ? { ...item, status } : item));
   }, [session, workspace, refreshSession]);
 
