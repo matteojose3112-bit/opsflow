@@ -10,7 +10,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Current milestone — Shared-workspace security hardening
 
-**Status: Remediation migration, regression-test suite, and CI workflow implemented on a separate branch; database execution pending.**
+**Status: Remediation migration and CI workflow implemented; disposable local Supabase database suite passed (19/19 assertions). Hosted validation remains outstanding.**
 
 - [x] Create a separate security branch without changing the docs-only PR.
 - [x] Preserve owner/admin workspace-name updates while denying generic `owner_id` writes with column-level grants.
@@ -19,8 +19,8 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Preserve the former owner's access as an admin after transfer.
 - [x] Add pgTAP regression tests for owner/admin/member/viewer and non-member boundaries.
 - [x] Add local Supabase configuration and a GitHub Actions workflow for database regression tests.
-- [ ] Run the database-test workflow and resolve any failures.
-- [ ] Review SQL migration semantics and test fixture compatibility against a disposable Supabase database.
+- [x] Run the database-test workflow; all 19 pgTAP assertions passed in CI.
+- [x] Validate migration application and test fixture compatibility against a disposable Supabase database.
 - [ ] Verify authenticated direct-API behavior with distinct test identities.
 - [ ] Reassess the localStorage session-token threat model and update requests' affected-row confirmation.
 
