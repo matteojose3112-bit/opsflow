@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select extensions.plan(12);
+select extensions.plan(16);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -37,26 +37,36 @@ set local role authenticated;
 
 -- An admin cannot promote their own membership or another member to owner.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
-update public.workspace_members set role = 'owner'
- where workspace_id = '20000000-0000-4000-8000-000000000001'
-   and user_id = '10000000-0000-4000-8000-000000000002';
+select extensions.throws_ok(
+  $$update public.workspace_members set role = 'owner'
+       where workspace_id = '20000000-0000-4000-8000-000000000001'
+         and user_id = '10000000-0000-4000-8000-000000000002'$$,
+  '42501',
+  null,
+  'admin cannot promote itself to owner'
+);
 select extensions.is(
   (select role from public.workspace_members
     where workspace_id = '20000000-0000-4000-8000-000000000001'
       and user_id = '10000000-0000-4000-8000-000000000002'),
   'admin',
-  'admin cannot promote itself to owner'
+  'admin membership remains unchanged after rejected self-promotion'
 );
 
-update public.workspace_members set role = 'owner'
- where workspace_id = '20000000-0000-4000-8000-000000000001'
-   and user_id = '10000000-0000-4000-8000-000000000003';
+select extensions.throws_ok(
+  $$update public.workspace_members set role = 'owner'
+       where workspace_id = '20000000-0000-4000-8000-000000000001'
+         and user_id = '10000000-0000-4000-8000-000000000003'$$,
+  '42501',
+  null,
+  'admin cannot promote another member to owner'
+);
 select extensions.is(
   (select role from public.workspace_members
     where workspace_id = '20000000-0000-4000-8000-000000000001'
       and user_id = '10000000-0000-4000-8000-000000000003'),
   'member',
-  'admin cannot promote another member to owner'
+  'member role remains unchanged after rejected promotion'
 );
 
 update public.workspaces
@@ -81,6 +91,16 @@ select extensions.is(
   'admin can still assign a permitted non-owner role'
 );
 
+select extensions.throws_ok(
+  $$select public.transfer_workspace_ownership(
+      '20000000-0000-4000-8000-000000000001',
+      '10000000-0000-4000-8000-000000000003'
+    )$$,
+  '42501',
+  null,
+  'admin cannot invoke the ownership transfer operation'
+);
+
 -- The owner cannot change owner_id or assign owner through generic CRUD.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
 select extensions.throws_ok(
@@ -99,6 +119,16 @@ select extensions.throws_ok(
   '42501',
   null,
   'owner cannot promote a member through generic role updates'
+);
+
+select extensions.throws_ok(
+  $$select public.transfer_workspace_ownership(
+      '20000000-0000-4000-8000-000000000001',
+      '10000000-0000-4000-8000-000000000005'
+    )$$,
+  '23503',
+  null,
+  'owner cannot transfer ownership to a non-member'
 );
 
 select extensions.lives_ok(
