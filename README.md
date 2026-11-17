@@ -22,11 +22,13 @@ The repository's latest recorded GitHub Actions CI and Pages deployment runs suc
 - Summary metrics and KPI comparisons.
 - Email/password sign-up, sign-in, sign-out, session refresh, and workspace membership loading.
 - Supabase-backed task and exception reads and status updates, scoped by workspace.
+- Confirmed status writes: PATCH requests return the affected row representation, and the client verifies the expected record ID and persisted status before updating the dashboard state.
+- Dependency-free Node.js regression tests for empty, malformed, mismatched, and multi-row mutation responses.
 - RLS policies for workspace membership, task/exception access, and role-based editing/deletion.
 - Viewer-role read-only controls in the interface and database policies.
 - Reduced-motion and touch-device handling.
 - GitHub Pages deployment configured for the `/opsflow/` project path.
-- GitHub Actions CI for TypeScript/production build and Oxlint.
+- GitHub Actions CI for TypeScript/production build, Oxlint, and reliability unit tests.
 
 ## Data boundaries
 
@@ -75,6 +77,7 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` for 
 
 ```bash
 npm run build
+npm test
 npm run lint
 ```
 
