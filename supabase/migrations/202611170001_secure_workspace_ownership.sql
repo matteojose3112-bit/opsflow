@@ -1,14 +1,20 @@
 -- Tighten workspace ownership and membership authorization.
 -- Ownership changes are intentionally separated from ordinary workspace updates.
 
--- Only the current owner may edit workspace metadata. The WITH CHECK clause
--- requires owner_id to remain the caller, preventing ownership changes here.
+-- Preserve owner/admin workspace-name management while removing table-level
+-- UPDATE. Authenticated clients can update only the name column; owner_id and
+-- other protected columns are writable only by the security-definer transfer
+-- function below.
 drop policy if exists "Owners and admins can update workspaces" on public.workspaces;
 drop policy if exists "Workspace owners can update workspace details" on public.workspaces;
-create policy "Workspace owners can update workspace details" on public.workspaces
+drop policy if exists "Owners and admins can update workspace details" on public.workspaces;
+create policy "Owners and admins can update workspace details" on public.workspaces
 for update to authenticated
-using (public.is_workspace_owner(id))
-with check (owner_id = (select auth.uid()));
+using (public.is_workspace_admin(id))
+with check (public.is_workspace_admin(id));
+
+revoke update on public.workspaces from authenticated;
+grant update (name) on public.workspaces to authenticated;
 
 -- Admins may add ordinary members, but only the actual workspace owner may
 -- create the initial owner membership for themselves.
@@ -26,9 +32,10 @@ with check (
   )
 );
 
--- No one can change or remove the owner membership through generic CRUD.
--- The dedicated transfer function below is the only supported transfer path.
+-- Membership identity/workspace columns are immutable through generic CRUD.
+-- Owners/admins may change only the role of non-owner membership rows.
 drop policy if exists "Owners and admins can change member roles" on public.workspace_members;
+drop policy if exists "Owners and admins can change non-owner member roles" on public.workspace_members;
 create policy "Owners and admins can change non-owner member roles" on public.workspace_members
 for update to authenticated
 using (
@@ -40,7 +47,11 @@ with check (
   and role <> 'owner'
 );
 
+revoke update on public.workspace_members from authenticated;
+grant update (role) on public.workspace_members to authenticated;
+
 drop policy if exists "Owners and admins can remove members" on public.workspace_members;
+drop policy if exists "Owners and admins can remove non-owner members" on public.workspace_members;
 create policy "Owners and admins can remove non-owner members" on public.workspace_members
 for delete to authenticated
 using (
