@@ -8,15 +8,31 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
-## Current milestone — Deployed MVP closeout
+## Current milestone — Shared-workspace security hardening
 
-**Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation remains outstanding.**
+**Status: Remediation migration and regression-test draft implemented on a separate branch; execution and review pending.**
+
+- [x] Create a separate security branch without changing the docs-only PR.
+- [x] Restrict ordinary workspace metadata updates to the current owner and prevent generic `owner_id` changes.
+- [x] Prevent generic membership operations from promoting, changing, or removing the owner membership.
+- [x] Add an explicit owner-only ownership-transfer function; require the recipient to already be a workspace member.
+- [x] Preserve the former owner's access as an admin after transfer.
+- [x] Add pgTAP regression tests for owner/admin/member/viewer and non-member boundaries.
+- [ ] Review SQL migration semantics and test fixture compatibility against a disposable Supabase database.
+- [ ] Run `supabase test db` and resolve any failures.
+- [ ] Add CI automation for database regression tests once the local test workflow is stable.
+- [ ] Verify authenticated direct-API behavior with distinct test identities.
+- [ ] Reassess the localStorage session-token threat model and update requests' affected-row confirmation.
+
+## MVP closeout — Existing implementation
+
+**Status: Frontend MVP and shared-storage integration implemented; production validation remains outstanding.**
 
 - [x] Build the responsive operations dashboard and core task/exception views.
 - [x] Add task search, status filters, overdue calculations, and KPI snapshot calculations.
 - [x] Add email/password authentication and workspace membership loading.
 - [x] Connect task and exception reads/status updates to workspace-scoped Supabase tables.
-- [x] Add RLS policies for workspace membership and role-based access.
+- [x] Add initial RLS policies for workspace membership and role-based access.
 - [x] Enforce viewer read-only controls in the interface and database policies.
 - [x] Configure GitHub Actions CI for TypeScript/production build and Oxlint.
 - [x] Configure GitHub Pages deployment for the `/opsflow/` project path.
@@ -114,8 +130,6 @@ Build in small steps, verify each milestone, and introduce complexity only when 
 
 ---
 
-Review date: 2026-11-03
+Review date: 2026-11-17
 
-## Current direction — 2026-11-03
-
-**Deployed portfolio MVP · Maintenance mode pending external validation.** The next meaningful milestone is validation, not feature expansion: test shared task/exception updates with two accounts, verify cross-workspace isolation and viewer restrictions through direct API requests, confirm anonymous denial and live RLS configuration, then smoke-test responsive, keyboard, loading, empty, and error states. Do not claim production readiness until these checks pass.
+**Current direction:** Resolve workspace ownership authorization before feature expansion. Validate the new migration and pgTAP suite against a disposable Supabase database, then verify direct API behavior with separate identities. Do not claim production readiness until those checks pass.
