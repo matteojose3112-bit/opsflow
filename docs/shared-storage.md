@@ -4,7 +4,7 @@
 
 The app uses Supabase Auth and workspace-scoped database reads/writes when deployed with the GitHub Actions repository variables. Task and exception status updates are shared; account, KPI, and activity panels remain sample data.
 
-The application implements email/password sign-in, workspace membership loading, and role-aware task/exception status controls. The initial RLS migration is supplemented on branch `fix/workspace-ownership-authorization` by an additive ownership-hardening migration and pgTAP regression tests. Neither has been applied to the hosted Supabase project, and the regression suite has not yet been executed. Repository implementation is not proof that the configured hosted project is correctly provisioned.
+The application implements email/password sign-in, workspace membership loading, and role-aware task/exception status controls. The initial RLS migration is supplemented on branch `fix/workspace-ownership-authorization` by an additive ownership-hardening migration and pgTAP regression tests. The regression suite passed all 19 pgTAP assertions against a disposable local Supabase database. The hardening migration has not been applied to the hosted Supabase project. Repository implementation is not proof that the configured hosted project is correctly provisioned.
 
 ## Why Supabase
 
@@ -66,7 +66,7 @@ The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite
 - [x] Add initial SQL migration for workspace and operational tables with RLS policies.
 - [x] Add a separate ownership-hardening migration and pgTAP regression test draft.
 - [x] Add a dedicated GitHub Actions workflow for local database regression tests.
-- [ ] Execute the database regression suite against a disposable Supabase database.
+- [x] Execute the database regression suite against a disposable Supabase database (19/19 pgTAP assertions passed in CI).
 - [ ] Verify anonymous requests cannot read or modify workspace data.
 - [ ] Verify a workspace member can read and update that workspace's tasks/exceptions.
 - [ ] Verify a non-member cannot access another workspace's records.
