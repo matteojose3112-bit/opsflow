@@ -7,11 +7,11 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 ## [Unreleased] — Workspace ownership security hardening
 
 ### Added
-- Added an additive migration that limits workspace metadata updates to the current owner and prevents ordinary updates from changing `workspaces.owner_id`.
-- Restricted generic membership inserts, updates, and deletes so admins cannot assign the owner role or modify/remove the owner membership.
+- Added an additive migration that preserves owner/admin workspace-name updates while column-level grants prevent ordinary clients from changing `workspaces.owner_id`.
+- Restricted membership updates to the role column and blocked generic identity reassignment, owner-role promotion, and owner-membership modification/removal.
 - Added `transfer_workspace_ownership(workspace_id, new_owner_id)`, a narrowly scoped security-definer function that requires the current owner and an existing workspace member as the recipient.
 - Kept the former owner as an admin after a successful ownership transfer.
-- Added pgTAP regression tests for admin self-promotion, promotion of another member, owner-id protection, permitted admin membership management, explicit ownership transfer, viewer restrictions, and non-member visibility.
+- Added pgTAP regression tests for admin self-promotion, promotion of another member, owner-id protection, membership identity reassignment, permitted admin metadata/role management, explicit ownership transfer, viewer restrictions, and non-member visibility.
 - Added local Supabase configuration and a dedicated GitHub Actions workflow to run the database migration and pgTAP suite on relevant pull requests.
 
 ### Validation status
