@@ -31,6 +31,8 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 ## [Unreleased] — Visual polish and reliability
 
 ### Improved
+- Task and exception status updates now request the affected row representation from Supabase and confirm exactly one matching record with the requested persisted status before updating local dashboard state.
+- Added dependency-free Node.js regression tests for empty, malformed, mismatched, and multi-row mutation responses; included them in GitHub Actions CI.
 - Added a subtle, layered dark background with soft violet/blue ambient gradients to give the workspace more depth while keeping the data panels readable.
 - Refined panel surfaces, borders, shadows, and the sticky top bar for a more cohesive finish.
 - Aligned cursor and magnetic interactions with Aster: hover feedback remains available on interactive controls, while only explicitly marked elements move magnetically.
