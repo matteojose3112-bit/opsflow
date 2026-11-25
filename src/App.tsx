@@ -56,6 +56,7 @@ interface AppProps {
   workspaceName: string;
   workspaceId: string;
   workspaces: { id: string; name: string; role: string }[];
+  workspaceError: string;
   onWorkspaceChange: (workspaceId: string) => void;
   userEmail: string;
   role: string;
@@ -64,7 +65,7 @@ interface AppProps {
   onSignOut: () => void;
 }
 
-function App({ initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
@@ -130,6 +131,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
           </header>
 
           <div className="page-content">
+            {workspaceError && <p className="workspace-error" role="alert">{workspaceError}</p>}
             <section className="welcome-row">
               <div><div className="eyebrow">{today.toUpperCase()} <span>·</span> SHARED WORKSPACE</div><h1>Operational overview <span className="wave">✳</span></h1><p className="page-subtitle">Review priorities, track exceptions, and keep work moving across your workspace.</p></div>
               <div className="welcome-actions"><button className="primary-button" data-magnetic type="button" onClick={() => { setStatusFilter('all'); document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' }); }}><span>＋</span> Review priorities</button></div>
