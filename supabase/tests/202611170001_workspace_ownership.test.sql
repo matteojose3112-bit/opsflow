@@ -323,23 +323,23 @@ select extensions.is(
   0,
   'member cannot read exceptions from another workspace'
 );
+update public.tasks set status = 'done'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-task';
 select extensions.is(
-  (with changed as (
-    update public.tasks set status = 'done'
-     where workspace_id = '20000000-0000-4000-8000-000000000002'
-       and id = 'second-workspace-task'
-     returning 1
-  ) select count(*)::integer from changed),
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-task' and status = 'done'),
   0,
   'member cannot update a task in another workspace'
 );
+update public.operational_exceptions set status = 'resolved'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-exception';
 select extensions.is(
-  (with changed as (
-    update public.operational_exceptions set status = 'resolved'
-     where workspace_id = '20000000-0000-4000-8000-000000000002'
-       and id = 'second-workspace-exception'
-     returning 1
-  ) select count(*)::integer from changed),
+  (select count(*)::integer from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-exception' and status = 'resolved'),
   0,
   'member cannot update an exception in another workspace'
 );
@@ -360,23 +360,23 @@ select extensions.is(
 
 -- Viewer permissions must also hold for direct table API updates.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000004', true);
+update public.tasks set status = 'done'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-task';
 select extensions.is(
-  (with changed as (
-    update public.tasks set status = 'done'
-     where workspace_id = '20000000-0000-4000-8000-000000000002'
-       and id = 'second-workspace-task'
-     returning 1
-  ) select count(*)::integer from changed),
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-task' and status = 'done'),
   0,
   'viewer cannot update a task through direct database access'
 );
+update public.operational_exceptions set status = 'resolved'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-exception';
 select extensions.is(
-  (with changed as (
-    update public.operational_exceptions set status = 'resolved'
-     where workspace_id = '20000000-0000-4000-8000-000000000002'
-       and id = 'second-workspace-exception'
-     returning 1
-  ) select count(*)::integer from changed),
+  (select count(*)::integer from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-exception' and status = 'resolved'),
   0,
   'viewer cannot update an exception through direct database access'
 );
