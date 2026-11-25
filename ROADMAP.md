@@ -8,9 +8,9 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
-## Current milestone — Connect shared account data to the dashboard
+## Current milestone — Workspace-scoped account foundation
 
-**Status: Database schema and RLS implemented on PR #15 · 18 pgTAP assertions and CI passed on commit `15eb0afd` · Dashboard integration next**
+**Status: Database schema, RLS, and read-only dashboard integration implemented on PR #15 · Final exact-head validation pending**
 
 - [x] Review existing account/task domain types and sample-data dependencies.
 - [x] Define the workspace-scoped accounts table, timestamps, constraints, and indexes.
@@ -18,9 +18,10 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Define role-aware read/write/delete policies for owner, admin, member, viewer, and non-member access.
 - [x] Add composite foreign keys preventing new cross-workspace task/exception account references.
 - [x] Add pgTAP coverage for role permissions, workspace isolation, cross-workspace references, and delete behavior.
-- [ ] Add typed account loading and loading/empty/error states in the React app.
-- [ ] Replace sample account cards and task account lookups only after the shared path is validated.
+- [x] Add typed account loading and account-load error/empty states in the React app.
+- [x] Replace sample account cards, account counts, health indicators, and task account lookups with workspace-scoped Supabase data.
 - [ ] Run build, lint, reliability tests, and disposable local Supabase tests on the final exact PR head.
+- [ ] Add safe account create/edit workflows and audit-friendly updates.
 - [ ] Review and merge PR #15 only after all checks pass and explicit approval is given.
 - [ ] Do not apply migrations or modify hosted Supabase without separate explicit approval.
 
@@ -72,7 +73,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Phase 3 — Operational data and insights
 
-**Status: Partially planned · Shared account schema is in review; dashboard integration is next**
+**Status: Partially planned · Shared account foundation is in review; account management and activity history remain**
 
 - [ ] Persist account records and account health in the shared database.
 - [ ] Move operational activity history into auditable shared records.
