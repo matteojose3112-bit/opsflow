@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import App from './App';
-import type { OperationalException, Task, TaskStatus } from './types';
+import type { Account, OperationalException, Task, TaskStatus } from './types';
 import './AuthApp.css';
 import { confirmSingleUpdatedRow } from './lib/mutationResponse.js';
 
@@ -54,6 +54,14 @@ async function request<T>(session: Session, path: string, options: RequestInit =
   return payload as T;
 }
 
+function toAccount(row: Record<string, unknown>): Account {
+  return {
+    id: String(row.id), name: String(row.name), industry: String(row.industry ?? 'Other'),
+    owner: String(row.owner ?? 'Unassigned'), health: row.health as Account['health'],
+    updatedAt: String(row.updated_at),
+  };
+}
+
 function toTask(row: Record<string, unknown>): Task {
   return {
     id: String(row.id), title: String(row.title), description: String(row.description ?? ''),
@@ -81,6 +89,8 @@ export default function AuthApp() {
   const [notice, setNotice] = useState('');
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accountsError, setAccountsError] = useState('');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [exceptions, setExceptions] = useState<OperationalException[]>([]);
   const [loadingWorkspace, setLoadingWorkspace] = useState(false);
@@ -91,7 +101,7 @@ export default function AuthApp() {
         await fetch(supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { apikey: publishableKey, Authorization: 'Bearer ' + session.access_token } });
       } catch { /* Clear local session even if the network is unavailable. */ }
     }
-    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setTasks([]); setExceptions([]);
+    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setAccounts([]); setAccountsError(''); setTasks([]); setExceptions([]);
   }, [session]);
 
   const refreshSession = useCallback(async (current: Session) => {
@@ -105,7 +115,7 @@ export default function AuthApp() {
   useEffect(() => {
     if (!session || !supabaseUrl || !publishableKey) return;
     let cancelled = false;
-    setLoadingWorkspace(true); setError('');
+    setLoadingWorkspace(true); setError(''); setAccountsError('');
     void (async () => {
       const active = await refreshSession(session);
       const memberships = await request<Array<{ workspace_id: string; role: string }>>(active,
@@ -122,8 +132,16 @@ export default function AuthApp() {
         request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
         request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
       ]);
+      let accountRows: Record<string, unknown>[] = [];
+      let accountLoadError = '';
+      try {
+        accountRows = await request<Record<string, unknown>[]>(active, 'accounts?select=id,name,industry,owner,health,updated_at&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=name.asc');
+      } catch (cause) {
+        accountLoadError = cause instanceof Error ? cause.message : 'Could not load workspace accounts.';
+      }
       if (cancelled) return;
       setWorkspace(selected); setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException));
+      setAccounts(accountRows.map(toAccount)); setAccountsError(accountLoadError);
     })().catch((cause: unknown) => {
       if (!cancelled) setError(cause instanceof Error ? cause.message : 'Could not load your shared workspace.');
     }).finally(() => { if (!cancelled) setLoadingWorkspace(false); });
@@ -134,18 +152,58 @@ export default function AuthApp() {
     if (!session) return;
     const selected = workspaces.find(item => item.id === workspaceId);
     if (!selected || selected.id === workspace?.id) return;
-    setLoadingWorkspace(true); setError('');
+    setLoadingWorkspace(true); setError(''); setAccountsError('');
     try {
       const active = await refreshSession(session);
       const results = await Promise.all([
         request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
         request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
       ]);
-      setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException)); setWorkspace(selected);
+      let accountRows: Record<string, unknown>[] = [];
+      let accountLoadError = '';
+      try {
+        accountRows = await request<Record<string, unknown>[]>(active, 'accounts?select=id,name,industry,owner,health,updated_at&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=name.asc');
+      } catch (cause) {
+        accountLoadError = cause instanceof Error ? cause.message : 'Could not load workspace accounts.';
+      }
+      setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException));
+      setAccounts(accountRows.map(toAccount)); setAccountsError(accountLoadError); setWorkspace(selected);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not switch workspaces.');
     } finally { setLoadingWorkspace(false); }
   }, [session, workspaces, workspace, refreshSession]);
+
+
+  const createAccount = useCallback(async (input: Omit<Account, 'id' | 'updatedAt'>) => {
+    if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
+    const active = await refreshSession(session);
+    const rows = await request<Record<string, unknown>[]>(active,
+      'accounts?select=id,name,industry,owner,health,updated_at',
+      { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ ...input, workspace_id: workspace.id }) });
+    if (rows.length !== 1) throw new Error('The account was not saved. Please refresh and try again.');
+    setAccounts(current => [...current, toAccount(rows[0])].sort((x, y) => x.name.localeCompare(y.name)));
+  }, [session, workspace, refreshSession]);
+
+  const updateAccount = useCallback(async (accountId: string, input: Omit<Account, 'id' | 'updatedAt'>) => {
+    if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
+    const active = await refreshSession(session);
+    const rows = await request<Record<string, unknown>[]>(active,
+      'accounts?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(accountId) + '&select=id,name,industry,owner,health,updated_at',
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(input) });
+    if (rows.length !== 1) throw new Error('The account could not be updated. It may have changed or been removed.');
+    const updated = toAccount(rows[0]);
+    setAccounts(current => current.map(item => item.id === accountId ? updated : item).sort((x, y) => x.name.localeCompare(y.name)));
+  }, [session, workspace, refreshSession]);
+
+  const deleteAccount = useCallback(async (accountId: string) => {
+    if (!session || !workspace || workspace.role !== 'owner' && workspace.role !== 'admin') throw new Error('Only workspace owners and admins can delete accounts.');
+    const active = await refreshSession(session);
+    const rows = await request<Array<{ id: string }>>(active,
+      'accounts?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(accountId) + '&select=id',
+      { method: 'DELETE', headers: { Prefer: 'return=representation' } });
+    if (rows.length !== 1) throw new Error('The account was not deleted. It may have changed or already been removed.');
+    setAccounts(current => current.filter(item => item.id !== accountId));
+  }, [session, workspace, refreshSession]);
 
   async function submitAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
@@ -201,5 +259,5 @@ export default function AuthApp() {
   if (error && !workspace) return <main className="auth-screen"><section className="auth-card"><h1>Workspace unavailable</h1><p className="auth-error">{error}</p><button className="auth-submit" onClick={() => { setError(''); setSession(current => current ? { ...current } : null); }}>Retry</button><button className="auth-toggle" onClick={() => void signOut()}>Sign out</button></section></main>;
   if (!workspace) return <main className="auth-screen"><section className="auth-card"><h1>Loading OpsFlow…</h1><p>Preparing your workspace.</p></section></main>;
 
-  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
+  return <App onCreateAccount={createAccount} onUpdateAccount={updateAccount} onDeleteAccount={deleteAccount} initialAccounts={accounts} initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} accountsError={accountsError} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
 }

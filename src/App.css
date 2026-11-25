@@ -230,3 +230,16 @@ h1 { color: #f1f2f6; font: 600 clamp(25px,2.2vw,31px)/1.2 Manrope,sans-serif; le
 .workspace-select option { background: #171a20; color: #e8e9ee; }
 
 .workspace-error { margin: 0 0 18px; padding: 11px 13px; border: 1px solid #5b343c; border-radius: 7px; background: #2a1c22; color: #f0a0aa; font-size: 11px; }
+
+
+/* Account management controls */
+.accounts-heading-actions { display:flex; align-items:center; gap:10px; }
+.account-actions { display:flex; gap:7px; border-top:1px solid #272b34; margin-top:10px; padding-top:8px; }
+.account-actions button { border:1px solid #343844; border-radius:5px; background:#1a1d25; color:#bdb4df; padding:5px 8px; font-size:8px; }
+.account-actions button:hover { border-color:#62567f; color:#eee9ff; }
+.account-actions .danger-action { color:#efa3ad; border-color:#55313a; background:#2a1c22; }
+.account-actions .danger-action:hover { border-color:#8b4652; color:#ffd9de; }
+@media (max-width:700px) {
+  .accounts-heading { align-items:flex-start; gap:8px; flex-direction:column; }
+  .accounts-heading-actions { width:100%; justify-content:space-between; }
+}

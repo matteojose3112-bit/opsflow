@@ -9,7 +9,7 @@ OpsFlow is a multi-workspace operations dashboard for turning day-to-day busines
 
 ## Current status
 
-**Deployed portfolio MVP · Workspace ownership and multi-workspace access controls merged · Production validation outstanding**
+**Deployed portfolio MVP · Account foundation and management workflows implemented on PR #15 · Hosted validation outstanding**
 
 The React + TypeScript application is deployed to GitHub Pages. Supabase Auth provides email/password authentication, and workspace-scoped task and operational-exception reads and status updates use PostgreSQL row-level security (RLS). Signed-in users can switch between workspaces they belong to; the selector displays their role and reloads the selected workspace's tasks and exceptions.
 
@@ -34,31 +34,31 @@ The ownership-hardening and multi-workspace changes are merged to `main`. CI, di
 
 ## Data boundaries
 
-OpsFlow currently combines shared operational records with illustrative dashboard data.
+OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema, policies, typed reads, and role-aware management controls are implemented on the open account-foundation PR. The live site remains unchanged until the migration is separately applied to hosted Supabase and the code is merged and deployed.
 
 | Area | Current source |
 | --- | --- |
 | Workspaces and memberships | Supabase |
 | Tasks and task status | Supabase workspace tables |
 | Operational exceptions and status | Supabase workspace tables |
-| Accounts and account health | Illustrative sample data |
+| Accounts schema and permissions | Supabase migration on feature branch; not yet deployed |
+| Account cards and account health in dashboard | Supabase account reads on feature branch; not yet deployed |
 | KPIs and performance snapshot | Illustrative sample data |
 | Recent activity | Illustrative sample data |
 
-Account information shown in the dashboard is not yet a shared, persistent account-management system. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
+The feature branch loads account cards, health indicators, task account names, and account counts from the workspace-scoped table. Editors can create and edit accounts; only owners/admins can delete. Mutations require a returned database row before local state changes. The deployed site still uses the previous release until the migration is applied to hosted Supabase and this branch is released. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Next milestone: account data foundation
+## Next milestone: account management workflows
 
-The next planned build is a workspace-scoped `accounts` data model. The work is planned, not yet implemented:
+The database foundation is implemented on PR #15 (`feat/workspace-scoped-accounts`):
 
-- Define an accounts schema and migration with workspace ownership and appropriate constraints.
-- Add RLS policies for workspace isolation and role-based access.
-- Add disposable local Supabase pgTAP coverage for owner, admin, member, viewer, and non-member behavior.
-- Add typed account loading and replace sample account reads only when the shared data path is validated.
-- Preserve clear loading, empty, and permission/error states.
-- Update documentation and verify all checks against the same commit before review.
+- Workspace-scoped `accounts` table with name, industry, owner, health, and timestamps.
+- RLS: members can read/create/update; owners and admins can delete; viewers are read-only; non-members are isolated.
+- Composite workspace/account foreign keys prevent new task and exception references from crossing workspace boundaries.
+- Legacy demo references are preserved by adding the foreign keys as `NOT VALID`; new writes are still checked.
+- 18 pgTAP assertions cover roles, isolation, cross-workspace references, and delete behavior.
 
-No hosted Supabase schema or data has been changed as part of the current release.
+The current PR adds typed account loading, workspace-scoped account creation and editing for editors, and owner/admin-only deletion. The UI handles account-load errors and empty workspaces, and confirms server-returned rows before changing local state. CI and all 54 disposable-local-Supabase assertions pass on exact head `2b4fc91e`. Next, add audit-friendly activity history and stronger account validation. Hosted Supabase has not been changed.
 
 ## Validation still outstanding
 

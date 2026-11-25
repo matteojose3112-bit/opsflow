@@ -4,6 +4,27 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [Unreleased] — Workspace-scoped account management
+
+### Added
+- Added an additive `accounts` table keyed by workspace and account ID, with industry, owner, health, and timestamps.
+- Added workspace-scoped RLS policies: members can read/create/update accounts; owners/admins can delete; viewers are read-only; non-members cannot access records.
+- Added composite workspace/account foreign keys for tasks and operational exceptions to prevent new cross-workspace references.
+- Preserved existing demo references with `NOT VALID` constraints while enforcing new writes.
+- Added 18 pgTAP assertions covering account access by role, workspace isolation, cross-workspace references, and account deletion behavior.
+- Added typed account loading on workspace initialization and switching, with a visible account-data error state that does not prevent tasks and exceptions from loading.
+- Added account creation and editing for workspace editors, plus owner/admin-only deletion, enforced by both UI role checks and database RLS.
+- Confirmed returned database rows before reflecting account create/update/delete operations in local dashboard state.
+- Replaced sample account cards, account counts, health indicators, and task account-name lookups with workspace-scoped account records.
+
+### Validation
+- CI passed on exact PR head `2b4fc91e` (TypeScript/production build, reliability tests, and Oxlint).
+- Disposable local Supabase migration and pgTAP workflow passed on the same exact PR head `2b4fc91e`: 18 account assertions and 54 total database assertions including the existing workspace-ownership suite.
+- Dashboard account reads are implemented on the feature branch; the deployed site remains on the prior release until the migration is separately applied to hosted Supabase and the feature is released.
+- PR #15 remains open and unmerged. No hosted Supabase schema or data has been changed.
+
+---
+
 ## [0.5.0] — Multi-workspace access controls — 2026-11-25
 
 ### Added

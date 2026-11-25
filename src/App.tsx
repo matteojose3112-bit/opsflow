@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import MouseEffects from './components/layout/MouseEffects';
 import { sampleData } from './data/sampleData';
 import { formatKpiValue, getDashboardSummary, isKpiOnTarget, isOverdue } from './lib/metrics';
-import type { OperationalException, Task, TaskPriority, TaskStatus } from './types';
+import type { Account, OperationalException, Task, TaskPriority, TaskStatus } from './types';
 import './App.css';
 
 const priorityLabels: Record<TaskPriority, string> = {
@@ -29,8 +29,8 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
-  const account = sampleData.accounts.find((item) => item.id === task.accountId);
+function TaskRow({ task, accounts, onStatusChange, canEdit }: { task: Task; accounts: Account[]; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
+  const account = accounts.find((item) => item.id === task.accountId);
   return (
     <article className="task-row">
       <span className={`task-status-dot ${task.status}`} aria-hidden="true" />
@@ -51,39 +51,70 @@ function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange
 }
 
 interface AppProps {
+  initialAccounts: Account[];
   initialTasks: Task[];
   initialExceptions: OperationalException[];
   workspaceName: string;
   workspaceId: string;
   workspaces: { id: string; name: string; role: string }[];
   workspaceError: string;
+  accountsError: string;
   onWorkspaceChange: (workspaceId: string) => void;
   userEmail: string;
   role: string;
   onTaskStatusChange: (taskId: string, status: TaskStatus) => Promise<void>;
+  onCreateAccount: (input: Omit<Account, 'id' | 'updatedAt'>) => Promise<void>;
+  onUpdateAccount: (accountId: string, input: Omit<Account, 'id' | 'updatedAt'>) => Promise<void>;
+  onDeleteAccount: (accountId: string) => Promise<void>;
   onExceptionStatusChange: (exceptionId: string, status: OperationalException['status']) => Promise<void>;
   onSignOut: () => void;
 }
 
-function App({ initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, accountsError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onCreateAccount, onUpdateAccount, onDeleteAccount, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
+  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [exceptions, setExceptions] = useState<OperationalException[]>(initialExceptions);
+  useEffect(() => setAccounts(initialAccounts), [initialAccounts]);
   useEffect(() => setTasks(initialTasks), [initialTasks]);
   useEffect(() => setExceptions(initialExceptions), [initialExceptions]);
   const summary = useMemo(() => getDashboardSummary({ ...sampleData, tasks, exceptions }), [tasks, exceptions]);
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
     void onTaskStatusChange(taskId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the task update.'));
   };
+
+  const editAccount = (account?: Account) => {
+    if (role === 'viewer') return;
+    const name = window.prompt('Account name', account?.name ?? '')?.trim();
+    if (!name) return;
+    const industry = window.prompt('Industry', account?.industry ?? 'Other')?.trim();
+    if (!industry) return;
+    const owner = window.prompt('Account owner', account?.owner ?? 'Unassigned')?.trim();
+    if (!owner) return;
+    const healthValue = window.prompt('Health: healthy, at_risk, or critical', account?.health ?? 'healthy')?.trim();
+    if (!healthValue || !['healthy', 'at_risk', 'critical'].includes(healthValue)) {
+      if (healthValue !== null && healthValue !== undefined) window.alert('Choose healthy, at_risk, or critical.');
+      return;
+    }
+    const input = { name, industry, owner, health: healthValue as Account['health'] };
+    const action = account ? onUpdateAccount(account.id, input) : onCreateAccount(input);
+    void action.catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the account.'));
+  };
+  const removeAccount = (account: Account) => {
+    if (role !== 'owner' && role !== 'admin') return;
+    if (!window.confirm('Delete ' + account.name + '? Linked tasks and exceptions will become unassigned.')) return;
+    void onDeleteAccount(account.id).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not delete the account.'));
+  };
+
   const updateExceptionStatus = (exceptionId: string, status: OperationalException['status']) => {
     void onExceptionStatusChange(exceptionId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the exception update.'));
   };
   const visibleTasks = useMemo(() => tasks
     .filter((task) => statusFilter === 'all' || task.status === statusFilter)
-    .filter((task) => `${task.title} ${task.owner} ${sampleData.accounts.find((account) => account.id === task.accountId)?.name ?? ''}`.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)), [query, statusFilter, tasks]);
+    .filter((task) => `${task.title} ${task.owner} ${accounts.find((account) => account.id === task.accountId)?.name ?? ''}`.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)), [query, statusFilter, tasks, accounts]);
 
   const today = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
@@ -141,7 +172,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
               <article className="metric-card"><div className="metric-top"><span>Active tasks</span><span className="metric-icon purple">↗</span></div><div className="metric-value">{summary.activeTasks}<span className="metric-total"> / {summary.totalTasks}</span></div><div className="metric-foot"><span className="trend neutral">Snapshot</span><span>current workload</span><div className="mini-bars">{[4,6,5,8,6,10,8,12,9,13,11,15].map((h,i)=><i key={i} style={{height:`${h}px`}} />)}</div></div></article>
               <article className="metric-card"><div className="metric-top"><span>Overdue tasks</span><span className="metric-icon amber">◷</span></div><div className="metric-value">{summary.overdueTasks.toString().padStart(2,'0')}</div><div className="metric-foot"><span className={summary.overdueTasks ? 'trend negative' : 'trend positive'}>{summary.overdueTasks ? 'Needs attention' : 'All clear'}</span><span>past due date</span></div><div className="metric-progress"><i className="progress-amber" style={{width:`${Math.min(100, summary.overdueTasks / Math.max(1,summary.totalTasks)*100)}%`}} /></div></article>
               <article className="metric-card"><div className="metric-top"><span>Open exceptions</span><span className="metric-icon rose">△</span></div><div className="metric-value">{summary.openExceptions.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend negative">{summary.criticalExceptions} critical</span><span>requiring attention</span></div><div className="exception-segments"><i /><i /><i /><i /><i /><i /><i /><i /></div></article>
-              <article className="metric-card"><div className="metric-top"><span>Accounts tracked</span><span className="metric-icon blue">▤</span></div><div className="metric-value">{summary.accountCount.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend neutral">{sampleData.accounts.filter(a=>a.health==='healthy').length} healthy</span><span>active accounts</span></div><div className="avatar-stack">{sampleData.accounts.map((account,i)=><span key={account.id} className={`stack-avatar stack-${i}`} title={account.name}>{initials(account.name)}</span>)}<span className="stack-more">+0</span></div></article>
+              <article className="metric-card"><div className="metric-top"><span>Accounts tracked</span><span className="metric-icon blue">▤</span></div><div className="metric-value">{accounts.length.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend neutral">{accounts.filter(a=>a.health==='healthy').length} healthy</span><span>active accounts</span></div><div className="avatar-stack">{accounts.map((account,i)=><span key={account.id} className={`stack-avatar stack-${i}`} title={account.name}>{initials(account.name)}</span>)}<span className="stack-more">+0</span></div></article>
             </section>
 
             <section className="content-grid">
@@ -151,7 +182,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
                   {([['all','All tasks'],['in_progress','In progress'],['todo','To do'],['blocked','Blocked']] as const).map(([value,label])=><button key={value} className={statusFilter===value?'selected':''} type="button" onClick={()=>setStatusFilter(value)}>{label}{value==='all'&&<span>{summary.totalTasks}</span>}</button>)}
                 </div>
                 <label className="search-field"><span>⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search tasks or owners..." aria-label="Search tasks or owners" /><kbd>⌘ K</kbd></label>
-                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
+                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} accounts={accounts} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
                 <div className="panel-footer"><span>Showing {visibleTasks.length} of {tasks.length} tasks</span><div className="task-legend"><i className="legend-done" /> Completed <i className="legend-progress" /> In progress <i className="legend-blocked" /> Blocked</div></div>
               </article>
 
@@ -176,7 +207,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
               </article>
             </section>
 
-            <section className="accounts-section" id="accounts"><div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{sampleData.accounts.length} accounts</span></div><div className="account-grid">{sampleData.accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}</div></section>
+            <section className="accounts-section" id="accounts">{accountsError&&<p className="workspace-error" role="alert">Account data could not be loaded: {accountsError}</p>}<div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><div className="accounts-heading-actions"><span className="accounts-total">{accounts.length} accounts</span>{role !== 'viewer' && <button className="secondary-button" type="button" onClick={() => editAccount()}>＋ Add account</button>}</div></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div>{role !== 'viewer' && <div className="account-actions"><button type="button" onClick={() => editAccount(account)}>Edit</button>{(role === 'owner' || role === 'admin') && <button type="button" className="danger-action" onClick={() => removeAccount(account)}>Delete</button>}</div>}</article>)}{accounts.length===0&&<div className="empty-state">{accountsError?'Account records are unavailable until the data connection is restored.':'No accounts in this workspace yet.'}</div>}</div></section>
             <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>SHARED WORKSPACE · MVP <i /></span></footer>
           </div>
         </main>
