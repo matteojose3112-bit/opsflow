@@ -8,22 +8,20 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
-## Current milestone — Account data foundation
+## Current milestone — Connect shared account data to the dashboard
 
-**Status: Planned · Not implemented**
+**Status: Database schema and RLS implemented on PR #15 · 18 pgTAP assertions and CI passed on commit `15eb0afd` · Dashboard integration next**
 
-The next development milestone is to replace illustrative account data with workspace-scoped shared records. Tasks already reference accounts, so a persistent account model is the next dependency for reliable account health, activity, and KPI reporting.
-
-- [ ] Review existing account/task domain types and sample-data dependencies.
-- [ ] Define the accounts table, workspace foreign key, timestamps, constraints, and indexes.
-- [ ] Add an additive Supabase migration with RLS enabled from creation.
-- [ ] Define least-privilege read/write policies for owner, admin, member, viewer, and non-member roles.
-- [ ] Add pgTAP tests for workspace isolation and role permissions using at least two workspaces.
-- [ ] Add typed account data access and loading/empty/error states.
-- [ ] Replace sample account reads only after the shared path and tests pass.
-- [ ] Update README, roadmap, and changelog with implemented scope and validation results.
-- [ ] Run build, lint, reliability tests, and disposable local Supabase tests on the exact same commit.
-- [ ] Open a reviewable PR; do not merge or deploy until explicitly authorized.
+- [x] Review existing account/task domain types and sample-data dependencies.
+- [x] Define the workspace-scoped accounts table, timestamps, constraints, and indexes.
+- [x] Add an additive Supabase migration with RLS enabled from creation.
+- [x] Define role-aware read/write/delete policies for owner, admin, member, viewer, and non-member access.
+- [x] Add composite foreign keys preventing new cross-workspace task/exception account references.
+- [x] Add pgTAP coverage for role permissions, workspace isolation, cross-workspace references, and delete behavior.
+- [ ] Add typed account loading and loading/empty/error states in the React app.
+- [ ] Replace sample account cards and task account lookups only after the shared path is validated.
+- [ ] Run build, lint, reliability tests, and disposable local Supabase tests on the final exact PR head.
+- [ ] Review and merge PR #15 only after all checks pass and explicit approval is given.
 - [ ] Do not apply migrations or modify hosted Supabase without separate explicit approval.
 
 ## Completed milestone — Multi-workspace access controls
@@ -74,7 +72,7 @@ The next development milestone is to replace illustrative account data with work
 
 ## Phase 3 — Operational data and insights
 
-**Status: Partially planned · Account data foundation is the next step**
+**Status: Partially planned · Shared account schema is in review; dashboard integration is next**
 
 - [ ] Persist account records and account health in the shared database.
 - [ ] Move operational activity history into auditable shared records.
