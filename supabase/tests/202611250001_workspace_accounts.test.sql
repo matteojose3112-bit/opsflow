@@ -47,12 +47,12 @@ select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000003
 select extensions.is((select count(*)::integer from public.accounts where id = 'account-primary'), 1, 'member can read workspace accounts');
 select extensions.lives_ok(
   $$insert into public.accounts (workspace_id, id, name, industry, owner, health)
-    values ('40000000-0000-4000-8000-000000000001', 'member-created-account', 'Member Created', 'Services', 'Member', 'healthy')$$,
+    values ('40000000-0000-4000-8000-000000000001', 'member-created-account', 'Member Created', 'Services', 'Member', 'healthy')$$$,
   'member can create an account in their workspace'
 );
 select extensions.lives_ok(
   $$update public.accounts set health = 'at_risk'
-    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$,
+    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$$,
   'member can update an account in their workspace'
 );
 select extensions.is(
@@ -62,7 +62,7 @@ select extensions.is(
 );
 select extensions.throws_ok(
   $insert into public.accounts (workspace_id, id, name)
-    values ('40000000-0000-4000-8000-000000000002', 'cross-workspace-create', 'Not allowed')$,
+    values ('40000000-0000-4000-8000-000000000002', 'cross-workspace-create', 'Not allowed')$$,
   '42501',
   null,
   'member cannot create an account in another workspace'
@@ -70,14 +70,14 @@ select extensions.throws_ok(
 
 select extensions.throws_ok(
   $insert into public.tasks (workspace_id, id, title, status, priority, owner, due_date, account_id)
-    values ('40000000-0000-4000-8000-000000000001', 'cross-account-task', 'Cross-workspace account link', 'todo', 'low', 'Member', current_date + 1, 'account-secondary')$,
+    values ('40000000-0000-4000-8000-000000000001', 'cross-account-task', 'Cross-workspace account link', 'todo', 'low', 'Member', current_date + 1, 'account-secondary')$$,
   '23503',
   null,
   'task cannot reference an account from another workspace'
 );
 select extensions.throws_ok(
   $insert into public.operational_exceptions (workspace_id, id, title, severity, status, owner, account_id)
-    values ('40000000-0000-4000-8000-000000000001', 'cross-account-exception', 'Cross-workspace account link', 'low', 'open', 'Member', 'account-secondary')$,
+    values ('40000000-0000-4000-8000-000000000001', 'cross-account-exception', 'Cross-workspace account link', 'low', 'open', 'Member', 'account-secondary')$$,
   '23503',
   null,
   'exception cannot reference an account from another workspace'
@@ -87,14 +87,14 @@ select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000004
 select extensions.is((select count(*)::integer from public.accounts where id = 'account-primary'), 1, 'viewer can read workspace accounts');
 select extensions.throws_ok(
   $$insert into public.accounts (workspace_id, id, name)
-    values ('40000000-0000-4000-8000-000000000001', 'viewer-created-account', 'Viewer Write')$$,
+    values ('40000000-0000-4000-8000-000000000001', 'viewer-created-account', 'Viewer Write')$$$,
   '42501',
   null,
   'viewer cannot create accounts'
 );
 select extensions.throws_ok(
   $$update public.accounts set health = 'critical'
-    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$,
+    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$$,
   '42501',
   null,
   'viewer cannot update accounts'
@@ -111,7 +111,7 @@ select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000005
 select extensions.is((select count(*)::integer from public.accounts), 0, 'non-member cannot read workspace accounts');
 select extensions.throws_ok(
   $$insert into public.accounts (workspace_id, id, name)
-    values ('40000000-0000-4000-8000-000000000001', 'outsider-created-account', 'Outsider Write')$$,
+    values ('40000000-0000-4000-8000-000000000001', 'outsider-created-account', 'Outsider Write')$$$,
   '42501',
   null,
   'non-member cannot create accounts'
@@ -120,7 +120,7 @@ select extensions.throws_ok(
 select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000002', true);
 select extensions.lives_ok(
   $$delete from public.accounts
-    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$,
+    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$$,
   'admin can delete accounts'
 );
 select extensions.is(
