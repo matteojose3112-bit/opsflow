@@ -106,7 +106,7 @@ select extensions.is(
 );
 
 select extensions.throws_ok(
-  $update public.workspace_members
+  $$update public.workspace_members
        set user_id = '10000000-0000-4000-8000-000000000005'
      where workspace_id = '20000000-0000-4000-8000-000000000001'
        and user_id = '10000000-0000-4000-8000-000000000003'$,
