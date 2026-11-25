@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select extensions.plan(19);
+select extensions.plan(25);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -106,13 +106,51 @@ select extensions.is(
 );
 
 select extensions.throws_ok(
-  $$update public.workspace_members
+  $update public.workspace_members
        set user_id = '10000000-0000-4000-8000-000000000005'
      where workspace_id = '20000000-0000-4000-8000-000000000001'
-       and user_id = '10000000-0000-4000-8000-000000000003'$$,
+       and user_id = '10000000-0000-4000-8000-000000000003'$,
   '42501',
   null,
   'admin cannot reassign a membership to another user'
+);
+
+-- Delete policies filter protected rows rather than raising an error. Assert
+-- the affected-row count and resulting membership state explicitly.
+select extensions.is(
+  (with deleted as (
+    delete from public.workspace_members
+     where workspace_id = '20000000-0000-4000-8000-000000000001'
+       and user_id = '10000000-0000-4000-8000-000000000001'
+    returning 1
+  ) select count(*)::integer from deleted),
+  0,
+  'admin cannot delete the workspace owner membership'
+);
+select extensions.is(
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000001'
+      and role = 'owner'),
+  1,
+  'owner membership remains intact after admin delete attempt'
+);
+select extensions.is(
+  (with deleted as (
+    delete from public.workspace_members
+     where workspace_id = '20000000-0000-4000-8000-000000000001'
+       and user_id = '10000000-0000-4000-8000-000000000003'
+    returning 1
+  ) select count(*)::integer from deleted),
+  1,
+  'admin can remove an ordinary member'
+);
+select extensions.is(
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000003'),
+  0,
+  'removed ordinary member no longer has a membership row'
 );
 
 select extensions.throws_ok(
@@ -184,6 +222,27 @@ select extensions.is(
       and user_id = '10000000-0000-4000-8000-000000000002'),
   'owner',
   'new owner receives the owner membership role'
+);
+
+-- Even the current owner cannot remove the protected owner row through
+-- generic membership CRUD; transfer remains the only ownership operation.
+select extensions.is(
+  (with deleted as (
+    delete from public.workspace_members
+     where workspace_id = '20000000-0000-4000-8000-000000000001'
+       and user_id = '10000000-0000-4000-8000-000000000002'
+    returning 1
+  ) select count(*)::integer from deleted),
+  0,
+  'current owner cannot delete its own owner membership'
+);
+select extensions.is(
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000002'
+      and role = 'owner'),
+  1,
+  'current owner membership remains intact after delete attempt'
 );
 
 -- A viewer cannot alter membership; a non-member cannot see the workspace.
