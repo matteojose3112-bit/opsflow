@@ -91,7 +91,7 @@ export default function AuthApp() {
         await fetch(supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { apikey: publishableKey, Authorization: 'Bearer ' + session.access_token } });
       } catch { /* Clear local session even if the network is unavailable. */ }
     }
-    saveSession(null); setSession(null); setWorkspace(null); setTasks([]); setExceptions([]);
+    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setTasks([]); setExceptions([]);
   }, [session]);
 
   const refreshSession = useCallback(async (current: Session) => {
@@ -201,5 +201,5 @@ export default function AuthApp() {
   if (error && !workspace) return <main className="auth-screen"><section className="auth-card"><h1>Workspace unavailable</h1><p className="auth-error">{error}</p><button className="auth-submit" onClick={() => { setError(''); setSession(current => current ? { ...current } : null); }}>Retry</button><button className="auth-toggle" onClick={() => void signOut()}>Sign out</button></section></main>;
   if (!workspace) return <main className="auth-screen"><section className="auth-card"><h1>Loading OpsFlow…</h1><p>Preparing your workspace.</p></section></main>;
 
-  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
+  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
 }
