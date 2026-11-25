@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import App from './App';
-import type { OperationalException, Task, TaskStatus } from './types';
+import type { Account, OperationalException, Task, TaskStatus } from './types';
 import './AuthApp.css';
 import { confirmSingleUpdatedRow } from './lib/mutationResponse.js';
 
@@ -54,6 +54,14 @@ async function request<T>(session: Session, path: string, options: RequestInit =
   return payload as T;
 }
 
+function toAccount(row: Record<string, unknown>): Account {
+  return {
+    id: String(row.id), name: String(row.name), industry: String(row.industry ?? 'Other'),
+    owner: String(row.owner ?? 'Unassigned'), health: row.health as Account['health'],
+    updatedAt: String(row.updated_at),
+  };
+}
+
 function toTask(row: Record<string, unknown>): Task {
   return {
     id: String(row.id), title: String(row.title), description: String(row.description ?? ''),
@@ -81,6 +89,7 @@ export default function AuthApp() {
   const [notice, setNotice] = useState('');
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [exceptions, setExceptions] = useState<OperationalException[]>([]);
   const [loadingWorkspace, setLoadingWorkspace] = useState(false);
@@ -91,7 +100,7 @@ export default function AuthApp() {
         await fetch(supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { apikey: publishableKey, Authorization: 'Bearer ' + session.access_token } });
       } catch { /* Clear local session even if the network is unavailable. */ }
     }
-    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setTasks([]); setExceptions([]);
+    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setAccounts([]); setTasks([]); setExceptions([]);
   }, [session]);
 
   const refreshSession = useCallback(async (current: Session) => {
@@ -121,9 +130,10 @@ export default function AuthApp() {
       const results = await Promise.all([
         request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
         request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
+        request<Record<string, unknown>[]>(active, 'accounts?select=id,name,industry,owner,health,updated_at&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=name.asc'),
       ]);
       if (cancelled) return;
-      setWorkspace(selected); setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException));
+      setWorkspace(selected); setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException)); setAccounts(results[2].map(toAccount));
     })().catch((cause: unknown) => {
       if (!cancelled) setError(cause instanceof Error ? cause.message : 'Could not load your shared workspace.');
     }).finally(() => { if (!cancelled) setLoadingWorkspace(false); });
@@ -140,8 +150,9 @@ export default function AuthApp() {
       const results = await Promise.all([
         request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
         request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
+        request<Record<string, unknown>[]>(active, 'accounts?select=id,name,industry,owner,health,updated_at&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=name.asc'),
       ]);
-      setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException)); setWorkspace(selected);
+      setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException)); setAccounts(results[2].map(toAccount)); setWorkspace(selected);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not switch workspaces.');
     } finally { setLoadingWorkspace(false); }
@@ -201,5 +212,5 @@ export default function AuthApp() {
   if (error && !workspace) return <main className="auth-screen"><section className="auth-card"><h1>Workspace unavailable</h1><p className="auth-error">{error}</p><button className="auth-submit" onClick={() => { setError(''); setSession(current => current ? { ...current } : null); }}>Retry</button><button className="auth-toggle" onClick={() => void signOut()}>Sign out</button></section></main>;
   if (!workspace) return <main className="auth-screen"><section className="auth-card"><h1>Loading OpsFlow…</h1><p>Preparing your workspace.</p></section></main>;
 
-  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
+  return <App initialAccounts={accounts} initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
 }
