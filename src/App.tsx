@@ -54,6 +54,9 @@ interface AppProps {
   initialTasks: Task[];
   initialExceptions: OperationalException[];
   workspaceName: string;
+  workspaceId: string;
+  workspaces: { id: string; name: string; role: string }[];
+  onWorkspaceChange: (workspaceId: string) => void;
   userEmail: string;
   role: string;
   onTaskStatusChange: (taskId: string, status: TaskStatus) => Promise<void>;
@@ -61,7 +64,7 @@ interface AppProps {
   onSignOut: () => void;
 }
 
-function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
@@ -93,11 +96,11 @@ function App({ initialTasks, initialExceptions, workspaceName, userEmail, role, 
             <span>ops<span className="brand-light">flow</span><small>OPERATIONS OS</small></span>
           </a>
           <div className="workspace-label">WORKSPACE</div>
-          <button className="workspace-switcher" type="button">
+          <label className="workspace-switcher" aria-label="Switch workspace">
             <span className="workspace-avatar">{initials(workspaceName)}</span>
             <span className="workspace-copy"><strong>{workspaceName}</strong><small>{role} workspace</small></span>
-            <span className="switcher-chevron">⌄</span>
-          </button>
+            {workspaces.length > 1 ? <select className="workspace-select" value={workspaceId} onChange={event => onWorkspaceChange(event.target.value)} aria-label="Select workspace"><option value={workspaceId}>{workspaceName}</option>{workspaces.filter(item => item.id !== workspaceId).map(item => <option key={item.id} value={item.id}>{item.name} · {item.role}</option>)}</select> : <span className="switcher-chevron">⌄</span>}
+          </label>
           <div className="nav-label">WORKSPACE</div>
           <nav className="primary-nav" aria-label="Main navigation">
             {[
