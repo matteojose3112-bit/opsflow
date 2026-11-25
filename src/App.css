@@ -228,3 +228,5 @@ h1 { color: #f1f2f6; font: 600 clamp(25px,2.2vw,31px)/1.2 Manrope,sans-serif; le
 .workspace-select { min-width: 0; max-width: 76px; margin-left: auto; border: 0; background: transparent; color: #9d94c7; font-size: 9px; }
 .workspace-select:focus-visible { outline: 2px solid #b8a4ff; outline-offset: 2px; }
 .workspace-select option { background: #171a20; color: #e8e9ee; }
+
+.workspace-error { margin: 0 0 18px; padding: 11px 13px; border: 1px solid #5b343c; border-radius: 7px; background: #2a1c22; color: #f0a0aa; font-size: 11px; }
