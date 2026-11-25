@@ -9,11 +9,11 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-**Deployed frontend MVP · Ownership security hardening under review · Production validation outstanding**
+**Deployed frontend MVP · Ownership security merged · Multi-workspace controls in review · Production validation outstanding**
 
 The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
 
-The task/exception mutation reliability checks now run in CI and confirm server-returned IDs and persisted statuses before updating the interface. A separate ownership-hardening change is under review; local Supabase database tests are still running and hosted multi-user correctness remains unverified.
+The task/exception mutation reliability checks now run in CI and confirm server-returned IDs and persisted statuses before updating the interface. Workspace ownership hardening is merged to `main`; CI, local Supabase migration/pgTAP tests, and the post-merge Pages deployment passed. The current feature branch adds workspace switching and expanded cross-workspace/viewer regression coverage; it is not deployed.
 
 ## Implemented
 
@@ -21,6 +21,7 @@ The task/exception mutation reliability checks now run in CI and confirm server-
 - Operational exception triage with severity, owner, description, and status updates.
 - Summary metrics and KPI comparisons.
 - Email/password sign-up, sign-in, sign-out, session refresh, and workspace membership loading.
+- Workspace ownership protections and an owner-only atomic ownership-transfer operation.
 - Supabase-backed task and exception reads and status updates, scoped by workspace.
 - Confirmed status writes: PATCH requests return the affected row representation, and the client verifies the expected record ID and persisted status before updating the dashboard state.
 - Dependency-free Node.js regression tests for empty, malformed, mismatched, and multi-row mutation responses.
@@ -32,7 +33,7 @@ The task/exception mutation reliability checks now run in CI and confirm server-
 
 ## Workspace ownership hardening
 
-A separate change adds an additive RLS migration that prevents generic updates to `workspaces.owner_id`, limits membership updates to role changes, protects the owner membership, and provides an owner-only `transfer_workspace_ownership` function. Ownership transfer requires an existing workspace member and demotes the former owner to admin. pgTAP coverage and a disposable local Supabase workflow are included; CI validation is pending. The migration has not been applied to hosted Supabase.
+The merged additive RLS migration prevents generic updates to `workspaces.owner_id`, limits membership updates to role changes, protects the owner membership, and provides an owner-only `transfer_workspace_ownership` function. Ownership transfer requires an existing workspace member and demotes the former owner to admin. The local pgTAP suite and disposable Supabase workflow pass in CI. The migration has not been applied to hosted Supabase.
 
 ## Data boundaries
 
@@ -46,7 +47,7 @@ OpsFlow combines shared operational records with illustrative dashboard data.
 | KPIs and performance snapshot | Sample data |
 | Recent activity | Sample data |
 
-Sample-based metrics and activity are for demonstration, not live business reporting. The app currently loads the first workspace membership returned for the signed-in user. Workspace switching, real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
+Sample-based metrics and activity are for demonstration, not live business reporting. The current feature branch implements a selector for workspaces the signed-in user belongs to; its release is pending review. Real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
 
 ## Validation still outstanding
 
