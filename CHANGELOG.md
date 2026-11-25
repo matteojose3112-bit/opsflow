@@ -4,6 +4,23 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [Unreleased] — Workspace-scoped account data foundation
+
+### Added
+- Added an additive `accounts` table keyed by workspace and account ID, with industry, owner, health, and timestamps.
+- Added workspace-scoped RLS policies: members can read/create/update accounts; owners/admins can delete; viewers are read-only; non-members cannot access records.
+- Added composite workspace/account foreign keys for tasks and operational exceptions to prevent new cross-workspace references.
+- Preserved existing demo references with `NOT VALID` constraints while enforcing new writes.
+- Added 18 pgTAP assertions covering account access by role, workspace isolation, cross-workspace references, and account deletion behavior.
+
+### Validation
+- CI passed on commit `15eb0afd`.
+- Disposable local Supabase migration and pgTAP workflow passed on commit `15eb0afd` (18 account assertions; 54 total database assertions including the existing workspace-ownership suite).
+- Dashboard account loading is not included yet; account cards still use illustrative sample data.
+- PR #15 remains open and unmerged. No hosted Supabase schema or data has been changed.
+
+---
+
 ## [0.5.0] — Multi-workspace access controls — 2026-11-25
 
 ### Added
