@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select extensions.plan(25);
+select extensions.plan(36);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -32,6 +32,43 @@ values
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000002', 'admin'),
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000003', 'member'),
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000004', 'viewer');
+
+insert into public.workspaces (id, name, owner_id)
+values (
+  '20000000-0000-4000-8000-000000000002',
+  'Second workspace isolation fixture',
+  '10000000-0000-4000-8000-000000000002'
+);
+
+insert into public.workspace_members (workspace_id, user_id, role)
+values
+  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002', 'owner'),
+  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000004', 'viewer');
+
+insert into public.tasks (
+  workspace_id, id, title, description, status, priority, owner, due_date
+) values (
+  '20000000-0000-4000-8000-000000000002',
+  'second-workspace-task',
+  'Private second-workspace task',
+  'Must remain isolated from users outside this workspace',
+  'todo',
+  'medium',
+  'Workspace owner',
+  current_date + 7
+);
+
+insert into public.operational_exceptions (
+  workspace_id, id, title, description, severity, status, owner
+) values (
+  '20000000-0000-4000-8000-000000000002',
+  'second-workspace-exception',
+  'Private second-workspace exception',
+  'Must remain isolated from users outside this workspace',
+  'high',
+  'open',
+  'Workspace owner'
+);
 
 set local role authenticated;
 
@@ -264,6 +301,100 @@ select extensions.is(
     where id = '20000000-0000-4000-8000-000000000001'),
   0,
   'non-member cannot read the workspace'
+);
+
+-- A user in one workspace must not see or mutate another workspace.
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select extensions.is(
+  (select count(*)::integer from public.workspaces
+    where id = '20000000-0000-4000-8000-000000000002'),
+  0,
+  'member cannot discover a workspace they do not belong to'
+);
+select extensions.is(
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'),
+  0,
+  'member cannot read tasks from another workspace'
+);
+select extensions.is(
+  (select count(*)::integer from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'),
+  0,
+  'member cannot read exceptions from another workspace'
+);
+update public.tasks set status = 'done'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-task';
+select extensions.is(
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-task' and status = 'done'),
+  0,
+  'member cannot update a task in another workspace'
+);
+update public.operational_exceptions set status = 'resolved'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-exception';
+select extensions.is(
+  (select count(*)::integer from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-exception' and status = 'resolved'),
+  0,
+  'member cannot update an exception in another workspace'
+);
+
+-- A user with two memberships can access both workspaces independently.
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select extensions.is(
+  (select count(*)::integer from public.workspaces),
+  2,
+  'multi-workspace member can discover both authorized workspaces'
+);
+select extensions.is(
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'),
+  1,
+  'multi-workspace member can read the second workspace task'
+);
+
+-- Viewer permissions must also hold for direct table API updates.
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000004', true);
+update public.tasks set status = 'done'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-task';
+select extensions.is(
+  (select count(*)::integer from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-task' and status = 'done'),
+  0,
+  'viewer cannot update a task through direct database access'
+);
+update public.operational_exceptions set status = 'resolved'
+ where workspace_id = '20000000-0000-4000-8000-000000000002'
+   and id = 'second-workspace-exception';
+select extensions.is(
+  (select count(*)::integer from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-exception' and status = 'resolved'),
+  0,
+  'viewer cannot update an exception through direct database access'
+);
+
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select extensions.is(
+  (select status from public.tasks
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-task'),
+  'todo',
+  'task remains unchanged after cross-workspace and viewer update attempts'
+);
+select extensions.is(
+  (select status from public.operational_exceptions
+    where workspace_id = '20000000-0000-4000-8000-000000000002'
+      and id = 'second-workspace-exception'),
+  'open',
+  'exception remains unchanged after cross-workspace and viewer update attempts'
 );
 
 select * from extensions.finish();

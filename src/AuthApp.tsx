@@ -80,6 +80,7 @@ export default function AuthApp() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [exceptions, setExceptions] = useState<OperationalException[]>([]);
   const [loadingWorkspace, setLoadingWorkspace] = useState(false);
@@ -90,7 +91,7 @@ export default function AuthApp() {
         await fetch(supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { apikey: publishableKey, Authorization: 'Bearer ' + session.access_token } });
       } catch { /* Clear local session even if the network is unavailable. */ }
     }
-    saveSession(null); setSession(null); setWorkspace(null); setTasks([]); setExceptions([]);
+    saveSession(null); setSession(null); setWorkspace(null); setWorkspaces([]); setTasks([]); setExceptions([]);
   }, [session]);
 
   const refreshSession = useCallback(async (current: Session) => {
@@ -110,14 +111,13 @@ export default function AuthApp() {
       const memberships = await request<Array<{ workspace_id: string; role: string }>>(active,
         'workspace_members?select=workspace_id,role&user_id=eq.' + encodeURIComponent(active.user.id) + '&order=created_at.asc');
       if (!memberships.length) throw new Error('This account is not assigned to a workspace yet. Ask a workspace owner to add your membership.');
-      const available: Workspace[] = [];
-      for (const membership of memberships) {
-        const rows = await request<Array<{ id: string; name: string }>>(active,
-          'workspaces?select=id,name&id=eq.' + encodeURIComponent(membership.workspace_id) + '&limit=1');
-        if (rows[0]) available.push({ ...rows[0], role: membership.role });
-      }
+      const rows = await request<Array<{ id: string; name: string }>>(active, 'workspaces?select=id,name&order=name.asc');
+      const roleByWorkspace = new Map(memberships.map(item => [item.workspace_id, item.role]));
+      const available = rows.filter(row => roleByWorkspace.has(row.id)).map(row => ({ ...row, role: roleByWorkspace.get(row.id)! }));
       if (!available.length) throw new Error('No accessible workspace was found for this account.');
       const selected = available[0];
+      if (cancelled) return;
+      setWorkspaces(available);
       const results = await Promise.all([
         request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
         request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
@@ -129,6 +129,23 @@ export default function AuthApp() {
     }).finally(() => { if (!cancelled) setLoadingWorkspace(false); });
     return () => { cancelled = true; };
   }, [session, refreshSession]);
+
+  const selectWorkspace = useCallback(async (workspaceId: string) => {
+    if (!session) return;
+    const selected = workspaces.find(item => item.id === workspaceId);
+    if (!selected || selected.id === workspace?.id) return;
+    setLoadingWorkspace(true); setError('');
+    try {
+      const active = await refreshSession(session);
+      const results = await Promise.all([
+        request<Record<string, unknown>[]>(active, 'tasks?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=due_date.asc'),
+        request<Record<string, unknown>[]>(active, 'operational_exceptions?select=*&workspace_id=eq.' + encodeURIComponent(selected.id) + '&order=created_at.desc'),
+      ]);
+      setTasks(results[0].map(toTask)); setExceptions(results[1].map(toException)); setWorkspace(selected);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not switch workspaces.');
+    } finally { setLoadingWorkspace(false); }
+  }, [session, workspaces, workspace, refreshSession]);
 
   async function submitAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
@@ -184,5 +201,5 @@ export default function AuthApp() {
   if (error && !workspace) return <main className="auth-screen"><section className="auth-card"><h1>Workspace unavailable</h1><p className="auth-error">{error}</p><button className="auth-submit" onClick={() => { setError(''); setSession(current => current ? { ...current } : null); }}>Retry</button><button className="auth-toggle" onClick={() => void signOut()}>Sign out</button></section></main>;
   if (!workspace) return <main className="auth-screen"><section className="auth-card"><h1>Loading OpsFlow…</h1><p>Preparing your workspace.</p></section></main>;
 
-  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
+  return <App initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
 }

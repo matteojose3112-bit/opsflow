@@ -8,6 +8,19 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
+## Current milestone — Multi-workspace access controls
+
+**Status: Implementation on feature branch; CI and disposable Supabase regression validation pending. Not deployed.**
+
+- [x] Load every workspace visible through the signed-in user's memberships and display its role.
+- [x] Add a workspace selector that reloads tasks and exceptions within the selected workspace.
+- [x] Surface workspace-switch failures without silently replacing the active workspace.
+- [x] Add two-workspace pgTAP fixtures and direct cross-workspace read/update denial assertions.
+- [x] Add direct API regression checks that viewers cannot update tasks or exceptions.
+- [ ] Pass TypeScript/build, lint, reliability tests, and the expanded local Supabase pgTAP suite on the same PR head.
+- [ ] Review the feature branch before any merge or deployment.
+- [ ] Validate workspace switching with two real memberships and distinct browser sessions against a separately authorized hosted test project.
+
 ## Current milestone — Deployed MVP closeout
 
 **Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation remains outstanding.**
@@ -28,7 +41,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Current milestone — Workspace ownership security
 
-**Status: Additive migration, ownership-transfer function, and pgTAP regression coverage are under review; hosted validation remains outstanding.**
+**Status: Merged to `main`; CI, disposable local Supabase migration/pgTAP tests, and Pages deployment passed. Hosted validation remains outstanding.**
 
 - [x] Separate ownership changes from ordinary workspace and membership CRUD.
 - [x] Restrict generic owner-id and membership-identity updates with column-level grants and RLS policies.
@@ -36,7 +49,7 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Add an owner-only atomic ownership-transfer function.
 - [x] Add pgTAP tests for owner/admin/member/viewer/non-member behavior and owner transfer.
 - [x] Add a disposable local Supabase GitHub Actions workflow.
-- [ ] Pass the expanded database regression suite in CI.
+- [x] Pass the expanded database regression suite in CI.
 - [ ] Verify direct API behavior with distinct hosted test identities.
 - [ ] Reassess localStorage session-token threat model and validate browser flows.
 
@@ -60,7 +73,7 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Design PostgreSQL tables for workspaces, members, tasks, and operational exceptions.
 - [x] Add row-level security policies for authenticated workspace access.
 - [x] Add email/password sign-up, sign-in, and sign-out.
-- [x] Load the authenticated user's workspace and membership role.
+- [x] Load the authenticated user's workspace and membership role.\n- [x] Load all authorized workspace memberships and add workspace switching (feature branch; pending review).
 - [x] Read tasks and exceptions from Supabase.
 - [x] Save task and exception status changes to shared storage.
 - [x] Require a returned row representation and verify the exact record ID and persisted status before reflecting a successful task or exception update.

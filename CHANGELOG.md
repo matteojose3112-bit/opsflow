@@ -4,6 +4,19 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [Unreleased] — Multi-workspace access controls
+
+### Added
+- Added a workspace selector populated only from workspaces visible to the authenticated user's memberships, with the member's role shown for each option.
+- Added workspace-scoped task and exception reloads when switching, plus a visible error state that preserves the previously active workspace if loading fails.
+- Expanded pgTAP fixtures to cover two separate workspaces, cross-workspace read/update isolation, multi-workspace membership visibility, and viewer denial of direct task/exception updates.
+
+### Validation status
+- Changes are on `feat/multi-workspace-access-controls`; automated CI and disposable local Supabase database tests are pending.
+- No merge, hosted Supabase mutation, or deployment has been performed.
+
+---
+
 ## [Unreleased] — Workspace ownership security hardening
 
 ### Added
