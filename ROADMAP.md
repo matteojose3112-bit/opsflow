@@ -26,6 +26,20 @@ Progress is marked complete only when the implementation exists. External valida
 - [ ] Verify anonymous access is denied in the configured Supabase project.
 - [ ] Smoke-test deployed desktop/mobile layouts, keyboard focus, and error states.
 
+## Current milestone — Workspace ownership security
+
+**Status: Additive migration, ownership-transfer function, and pgTAP regression coverage are under review; hosted validation remains outstanding.**
+
+- [x] Separate ownership changes from ordinary workspace and membership CRUD.
+- [x] Restrict generic owner-id and membership-identity updates with column-level grants and RLS policies.
+- [x] Protect owner membership from generic role changes and deletion.
+- [x] Add an owner-only atomic ownership-transfer function.
+- [x] Add pgTAP tests for owner/admin/member/viewer/non-member behavior and owner transfer.
+- [x] Add a disposable local Supabase GitHub Actions workflow.
+- [ ] Pass the expanded database regression suite in CI.
+- [ ] Verify direct API behavior with distinct hosted test identities.
+- [ ] Reassess localStorage session-token threat model and validate browser flows.
+
 ## Phase 1 — Functional dashboard foundation
 
 **Status: Implemented and deployed**
