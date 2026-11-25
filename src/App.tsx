@@ -63,11 +63,14 @@ interface AppProps {
   userEmail: string;
   role: string;
   onTaskStatusChange: (taskId: string, status: TaskStatus) => Promise<void>;
+  onCreateAccount: (input: Omit<Account, 'id' | 'updatedAt'>) => Promise<void>;
+  onUpdateAccount: (accountId: string, input: Omit<Account, 'id' | 'updatedAt'>) => Promise<void>;
+  onDeleteAccount: (accountId: string) => Promise<void>;
   onExceptionStatusChange: (exceptionId: string, status: OperationalException['status']) => Promise<void>;
   onSignOut: () => void;
 }
 
-function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, accountsError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, accountsError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onCreateAccount, onUpdateAccount, onDeleteAccount, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
@@ -81,6 +84,30 @@ function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, 
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
     void onTaskStatusChange(taskId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the task update.'));
   };
+
+  const editAccount = (account?: Account) => {
+    if (role === 'viewer') return;
+    const name = window.prompt('Account name', account?.name ?? '')?.trim();
+    if (!name) return;
+    const industry = window.prompt('Industry', account?.industry ?? 'Other')?.trim();
+    if (!industry) return;
+    const owner = window.prompt('Account owner', account?.owner ?? 'Unassigned')?.trim();
+    if (!owner) return;
+    const healthValue = window.prompt('Health: healthy, at_risk, or critical', account?.health ?? 'healthy')?.trim();
+    if (!healthValue || !['healthy', 'at_risk', 'critical'].includes(healthValue)) {
+      if (healthValue !== null && healthValue !== undefined) window.alert('Choose healthy, at_risk, or critical.');
+      return;
+    }
+    const input = { name, industry, owner, health: healthValue as Account['health'] };
+    const action = account ? onUpdateAccount(account.id, input) : onCreateAccount(input);
+    void action.catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the account.'));
+  };
+  const removeAccount = (account: Account) => {
+    if (role !== 'owner' && role !== 'admin') return;
+    if (!window.confirm('Delete ' + account.name + '? Linked tasks and exceptions will become unassigned.')) return;
+    void onDeleteAccount(account.id).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not delete the account.'));
+  };
+
   const updateExceptionStatus = (exceptionId: string, status: OperationalException['status']) => {
     void onExceptionStatusChange(exceptionId, status).catch((error: unknown) => window.alert(error instanceof Error ? error.message : 'Could not save the exception update.'));
   };
@@ -180,7 +207,7 @@ function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, 
               </article>
             </section>
 
-            <section className="accounts-section" id="accounts">{accountsError&&<p className="workspace-error" role="alert">Account data could not be loaded: {accountsError}</p>}<div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{accounts.length} accounts</span></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}{accounts.length===0&&<div className="empty-state">{accountsError?'Account records are unavailable until the data connection is restored.':'No accounts in this workspace yet.'}</div>}</div></section>
+            <section className="accounts-section" id="accounts">{accountsError&&<p className="workspace-error" role="alert">Account data could not be loaded: {accountsError}</p>}<div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><div className="accounts-heading-actions"><span className="accounts-total">{accounts.length} accounts</span>{role !== 'viewer' && <button className="secondary-button" type="button" onClick={() => editAccount()}>＋ Add account</button>}</div></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div>{role !== 'viewer' && <div className="account-actions"><button type="button" onClick={() => editAccount(account)}>Edit</button>{(role === 'owner' || role === 'admin') && <button type="button" className="danger-action" onClick={() => removeAccount(account)}>Delete</button>}</div>}</article>)}{accounts.length===0&&<div className="empty-state">{accountsError?'Account records are unavailable until the data connection is restored.':'No accounts in this workspace yet.'}</div>}</div></section>
             <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>SHARED WORKSPACE · MVP <i /></span></footer>
           </div>
         </main>
