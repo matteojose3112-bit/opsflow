@@ -4,6 +4,21 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
+## [Unreleased] — Workspace ownership security hardening
+
+### Added
+- Added a separate migration to restrict generic workspace ownership changes and membership role/identity mutations.
+- Added an explicit owner-only ownership-transfer function that requires an existing member and preserves former-owner access as admin.
+- Added pgTAP regression coverage for protected owner membership deletion, ordinary member removal, owner transfer, viewer restrictions, and non-member isolation.
+- Added local Supabase configuration and a dedicated GitHub Actions database-test workflow.
+
+### Validation status
+- Build/lint and the existing task/exception reliability checks are already passing on `main`.
+- Expanded database regression checks are pending CI confirmation on this branch.
+- Hosted Supabase behavior and production rollout remain unverified; no hosted database or deployment was changed.
+
+---
+
 ## [0.3.0] — MVP Closeout & Maintenance Mode
 
 ### Clarified
