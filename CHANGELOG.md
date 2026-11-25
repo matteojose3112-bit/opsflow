@@ -4,76 +4,54 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 
 ---
 
-## [Unreleased] — Multi-workspace access controls
+## [0.5.0] — Multi-workspace access controls — 2026-11-25
 
 ### Added
-- Added a workspace selector populated only from workspaces visible to the authenticated user's memberships, with the member's role shown for each option.
-- Added workspace-scoped task and exception reloads when switching, plus a visible error state that preserves the previously active workspace if loading fails.
-- Expanded pgTAP fixtures to cover two separate workspaces, cross-workspace read/update isolation, multi-workspace membership visibility, and viewer denial of direct task/exception updates.
+- Added a workspace selector populated from the signed-in user's accessible memberships, displaying the user's role for each workspace.
+- Added workspace-scoped task and operational-exception reloads when switching workspaces.
+- Added visible workspace-switch error handling that preserves the previously active workspace when loading fails.
+- Expanded disposable local Supabase pgTAP coverage to 36 assertions, including two-workspace isolation, cross-workspace read/update denial, multi-workspace membership visibility, and viewer write denial.
 
-### Validation status
-- Changes are on `feat/multi-workspace-access-controls`; automated CI and disposable local Supabase database tests are pending.
-- No merge, hosted Supabase mutation, or deployment has been performed.
+### Validation
+- CI passed on the reviewed PR commit.
+- Disposable local Supabase migration and pgTAP workflow passed on the reviewed PR commit.
+- Post-merge CI and database security workflow passed on merge commit `b0912a6`.
+- GitHub Pages deployment completed successfully on merge commit `b0912a6`.
+- Hosted Supabase was not modified. Live validation with separate hosted test identities remains outstanding.
 
 ---
 
-## [Unreleased] — Workspace ownership security hardening
+## [0.4.0] — Workspace ownership security hardening
 
 ### Added
-- Added a separate migration to restrict generic workspace ownership changes and membership role/identity mutations.
-- Added an explicit owner-only ownership-transfer function that requires an existing member and preserves former-owner access as admin.
-- Added pgTAP regression coverage for protected owner membership deletion, ordinary member removal, owner transfer, viewer restrictions, and non-member isolation.
-- Added local Supabase configuration and a dedicated GitHub Actions database-test workflow.
+- Added an additive migration to restrict generic workspace ownership changes and membership identity mutations.
+- Added an owner-only atomic ownership-transfer function that requires an existing workspace member and demotes the former owner to admin.
+- Added pgTAP regression coverage for protected owner membership, ordinary member removal, ownership transfer, viewer restrictions, and non-member isolation.
+- Added a disposable local Supabase configuration and dedicated GitHub Actions database-test workflow.
 
-### Validation status
-- Build/lint and the existing task/exception reliability checks are already passing on `main`.
-- Expanded database regression checks are pending CI confirmation on this branch.
-- Hosted Supabase behavior and production rollout remain unverified; no hosted database or deployment was changed.
-
----
-
-## [0.3.0] — MVP Closeout & Maintenance Mode
-
-### Clarified
-- Defined the current release as a deployed frontend MVP with Supabase-backed authentication and workspace-scoped task/exception integration.
-- Documented that account health, KPIs, and recent activity remain illustrative sample data.
-- Documented that workspace switching, real-time subscriptions, account/KPI/activity persistence, and demo-data import are not implemented.
-- Distinguished successful CI and Pages deployment from uncompleted live multi-user and security validation.
-- Set the project to maintenance mode pending external validation rather than implying production readiness.
-
-### Validation still required
-- Test shared task and exception updates with two distinct accounts and browser sessions.
-- Verify cross-workspace isolation, viewer restrictions, and anonymous access denial against the live Supabase project.
-- Smoke-test responsive layouts, keyboard focus, and recoverable error states.
-- Confirm the configured live project has the intended RLS policies and redirect settings.
-
-### Existing implementation
-- Email/password authentication and session refresh.
-- Workspace membership loading and role-aware UI controls.
-- Supabase-backed task and operational-exception reads and status updates.
-- PostgreSQL schema and RLS policies for workspaces, members, tasks, and exceptions.
-- GitHub Actions CI and GitHub Pages deployment.
+### Validation
+- CI and disposable local Supabase migration/pgTAP tests passed before merge.
+- Changes merged to `main`; hosted Supabase behavior remains unverified and no hosted database was changed.
 
 ---
 
-## [Unreleased] — Visual polish and reliability
+## [0.3.0] — MVP closeout and shared task/exception integration
+
+### Added
+- Added email/password authentication and session refresh.
+- Added workspace membership loading and role-aware interface controls.
+- Added Supabase-backed, workspace-scoped task and operational-exception reads and status updates.
+- Added PostgreSQL schema and RLS policies for workspaces, members, tasks, and exceptions.
+- Added GitHub Actions CI and GitHub Pages deployment.
 
 ### Improved
-- Task and exception status updates now request the affected row representation from Supabase and confirm exactly one matching record with the requested persisted status before updating local dashboard state.
-- Added dependency-free Node.js regression tests for empty, malformed, mismatched, and multi-row mutation responses; included them in GitHub Actions CI.
-- Added a subtle, layered dark background with soft violet/blue ambient gradients to give the workspace more depth while keeping the data panels readable.
-- Refined panel surfaces, borders, shadows, and the sticky top bar for a more cohesive finish.
-- Aligned cursor and magnetic interactions with Aster: hover feedback remains available on interactive controls, while only explicitly marked elements move magnetically.
-- Disabled magnetic movement when reduced motion is preferred and kept custom cursor effects off touch/coarse-pointer devices.
-- Updated dashboard copy to make the shared workspace clearer and avoid presenting a sample trend as a verified week-over-week result.
-- Improved the page title, description, and Open Graph metadata.
-- Rewrote the README and roadmap to distinguish implemented functionality from outstanding verification.
+- Task and exception status updates now verify the returned record ID and persisted status before updating dashboard state.
+- Added regression tests for empty, malformed, mismatched, and multi-row mutation responses.
+- Improved responsive styling, reduced-motion handling, touch-device behavior, and deployment path configuration.
 
-### Validation still required
-- Smoke-test the live GitHub Pages deployment and responsive layouts.
-- Verify task/exception updates across two separate accounts and browser sessions.
-- Confirm workspace isolation and viewer-role restrictions.
-- Account health, KPIs, and recent activity remain sample data; shared storage currently covers tasks and operational exceptions.
+### Data boundaries
+- Account health, KPIs, and recent activity remain illustrative sample data.
+- The app is a deployed portfolio MVP, not a production-validated multi-user operations system.
 
 ---
 
@@ -87,13 +65,12 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Added browser-local persistence for task and exception status changes, including a reset action for the sample workspace.
 - Added Supabase/PostgreSQL storage for workspace-scoped tasks and operational exceptions, with workspace membership and row-level security.
 - Added email/password sign-up, sign-in, sign-out, and authenticated workspace loading.
-- Connected task and exception reads and status updates to Supabase.
 - Added GitHub Actions build configuration for the public Supabase URL and publishable key.
-- Corrected the GitHub Pages entry-script path so the application loads from the `/opsflow/` project URL.
 - Added Aster-inspired cursor and magnetic interactions.
 
-### Validation status
-The dashboard is deployed. Cross-user shared updates, workspace isolation, and the latest production build still require verification.
+### Validation
+- Dashboard deployed to GitHub Pages.
+- Cross-user shared updates, workspace isolation, and live security validation remain separate verification tasks.
 
 ---
 
@@ -111,10 +88,3 @@ The dashboard is deployed. Cross-user shared updates, workspace isolation, and t
 OpsFlow is a practical learning project focused on business operations, structured data, KPI reporting, task visibility, and exception handling.
 
 **Learn → Build → Test → Understand → Improve → Repeat**
-
-## [0.4.0] — Documentation synchronization — 2026-11-03
-
-### Updated
-- Refreshed README and roadmap to distinguish implemented Supabase task/exception functionality from sample account, KPI, and activity data.
-- Made the remaining two-account, workspace-isolation, viewer-permission, anonymous-access, and live UI validation tasks explicit.
-- Reaffirmed maintenance mode pending external validation.
