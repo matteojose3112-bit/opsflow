@@ -4,7 +4,7 @@
 
 The app uses Supabase Auth and workspace-scoped database reads/writes when deployed with the GitHub Actions repository variables. Task and exception status updates are shared; account, KPI, and activity panels remain sample data.
 
-The application implements email/password sign-in, workspace membership loading, and role-aware task/exception status controls. The initial RLS migration is supplemented on branch `fix/workspace-ownership-authorization` by an additive ownership-hardening migration and pgTAP regression tests. The regression suite passed all 19 pgTAP assertions against a disposable local Supabase database. The hardening migration has not been applied to the hosted Supabase project. Repository implementation is not proof that the configured hosted project is correctly provisioned.
+The application implements email/password sign-in, workspace membership loading, and role-aware task/exception status controls. The initial RLS migration is supplemented on branch `fix/workspace-ownership-authorization` by an additive ownership-hardening migration and pgTAP regression tests. The regression suite passed all 25 pgTAP assertions against a disposable local Supabase database. The hardening migration has not been applied to the hosted Supabase project. Repository implementation is not proof that the configured hosted project is correctly provisioned.
 
 ## Why Supabase
 
@@ -49,7 +49,7 @@ supabase test db
 supabase stop --no-backup
 ```
 
-The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite on pull requests that change `supabase/**`. The tests check that admins cannot self-promote or promote another member to owner, cannot change `owner_id` or reassign member identities, retain permitted workspace-name and non-owner role management, and that only the current owner can transfer ownership. They also check that the former owner becomes an admin, the new owner receives the owner role, viewers cannot change membership, and non-members cannot read the workspace.
+The dedicated workflow at `.github/workflows/database-tests.yml` runs this suite on pull requests that change `supabase/**`. The tests check that admins cannot self-promote or promote another member to owner, cannot change `owner_id` or reassign member identities, cannot delete the owner membership, and can remove ordinary members. They also check permitted workspace-name and non-owner role management, owner-only ownership transfer, former-owner demotion to admin, new-owner promotion, protection of the current owner membership, viewer restrictions, and non-member isolation.
 
 ## Security and rollout rules
 
