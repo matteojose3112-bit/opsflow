@@ -58,6 +58,7 @@ interface AppProps {
   workspaceId: string;
   workspaces: { id: string; name: string; role: string }[];
   workspaceError: string;
+  accountsError: string;
   onWorkspaceChange: (workspaceId: string) => void;
   userEmail: string;
   role: string;
@@ -66,7 +67,7 @@ interface AppProps {
   onSignOut: () => void;
 }
 
-function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, accountsError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
@@ -144,7 +145,7 @@ function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, 
               <article className="metric-card"><div className="metric-top"><span>Active tasks</span><span className="metric-icon purple">↗</span></div><div className="metric-value">{summary.activeTasks}<span className="metric-total"> / {summary.totalTasks}</span></div><div className="metric-foot"><span className="trend neutral">Snapshot</span><span>current workload</span><div className="mini-bars">{[4,6,5,8,6,10,8,12,9,13,11,15].map((h,i)=><i key={i} style={{height:`${h}px`}} />)}</div></div></article>
               <article className="metric-card"><div className="metric-top"><span>Overdue tasks</span><span className="metric-icon amber">◷</span></div><div className="metric-value">{summary.overdueTasks.toString().padStart(2,'0')}</div><div className="metric-foot"><span className={summary.overdueTasks ? 'trend negative' : 'trend positive'}>{summary.overdueTasks ? 'Needs attention' : 'All clear'}</span><span>past due date</span></div><div className="metric-progress"><i className="progress-amber" style={{width:`${Math.min(100, summary.overdueTasks / Math.max(1,summary.totalTasks)*100)}%`}} /></div></article>
               <article className="metric-card"><div className="metric-top"><span>Open exceptions</span><span className="metric-icon rose">△</span></div><div className="metric-value">{summary.openExceptions.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend negative">{summary.criticalExceptions} critical</span><span>requiring attention</span></div><div className="exception-segments"><i /><i /><i /><i /><i /><i /><i /><i /></div></article>
-              <article className="metric-card"><div className="metric-top"><span>Accounts tracked</span><span className="metric-icon blue">▤</span></div><div className="metric-value">{summary.accountCount.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend neutral">{sampleData.accounts.filter(a=>a.health==='healthy').length} healthy</span><span>active accounts</span></div><div className="avatar-stack">{sampleData.accounts.map((account,i)=><span key={account.id} className={`stack-avatar stack-${i}`} title={account.name}>{initials(account.name)}</span>)}<span className="stack-more">+0</span></div></article>
+              <article className="metric-card"><div className="metric-top"><span>Accounts tracked</span><span className="metric-icon blue">▤</span></div><div className="metric-value">{accounts.length.toString().padStart(2,'0')}</div><div className="metric-foot"><span className="trend neutral">{accounts.filter(a=>a.health==='healthy').length} healthy</span><span>active accounts</span></div><div className="avatar-stack">{accounts.map((account,i)=><span key={account.id} className={`stack-avatar stack-${i}`} title={account.name}>{initials(account.name)}</span>)}<span className="stack-more">+0</span></div></article>
             </section>
 
             <section className="content-grid">
@@ -179,7 +180,7 @@ function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, 
               </article>
             </section>
 
-            <section className="accounts-section" id="accounts"><div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{accounts.length} accounts</span></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}{accounts.length===0&&<div className="empty-state">No accounts in this workspace yet.</div>}</div></section>
+            <section className="accounts-section" id="accounts">{accountsError&&<p className="workspace-error" role="alert">Account data could not be loaded: {accountsError}</p>}<div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{accounts.length} accounts</span></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}{accounts.length===0&&<div className="empty-state">{accountsError?'Account records are unavailable until the data connection is restored.':'No accounts in this workspace yet.'}</div>}</div></section>
             <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>SHARED WORKSPACE · MVP <i /></span></footer>
           </div>
         </main>
