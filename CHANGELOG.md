@@ -11,12 +11,12 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Restricted membership updates to the role column and blocked generic identity reassignment, owner-role promotion, and owner-membership modification/removal.
 - Added `transfer_workspace_ownership(workspace_id, new_owner_id)`, a narrowly scoped security-definer function that requires the current owner and an existing workspace member as the recipient.
 - Kept the former owner as an admin after a successful ownership transfer.
-- Added pgTAP regression tests for admin self-promotion, promotion of another member, owner-id protection, membership identity reassignment, permitted admin metadata/role management, explicit ownership transfer, viewer restrictions, and non-member visibility.
+- Added pgTAP regression tests for admin self-promotion, promotion of another member, owner-id protection, membership identity reassignment, protected owner deletion, ordinary-member removal, permitted admin metadata/role management, explicit ownership transfer, viewer restrictions, and non-member visibility.
 - Added local Supabase configuration and a dedicated GitHub Actions workflow to run the database migration and pgTAP suite on relevant pull requests.
 
 ### Validation status
 - The application build/lint CI passed on an intermediate security-branch commit.
-- The dedicated database-test workflow passed all 19 pgTAP assertions against a disposable local Supabase database; the local stack also shut down successfully.
+- The dedicated database-test workflow passed all 25 pgTAP assertions against a disposable local Supabase database; the local stack also shut down successfully.
 - Hosted Supabase configuration, authenticated direct-API behavior, and production rollout remain unverified.
 - No hosted database or deployment was changed.
 
