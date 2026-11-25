@@ -61,23 +61,23 @@ select extensions.is(
   'member account update is persisted'
 );
 select extensions.throws_ok(
-  $q$insert into public.accounts (workspace_id, id, name)
-    values ('40000000-0000-4000-8000-000000000002', 'cross-workspace-create', 'Not allowed')$q$,
+  'insert into public.accounts (workspace_id, id, name)
+    values (''40000000-0000-4000-8000-000000000002'', ''cross-workspace-create'', ''Not allowed'')',
   '42501',
   null,
   'member cannot create an account in another workspace'
 );
 
 select extensions.throws_ok(
-  $q$insert into public.tasks (workspace_id, id, title, status, priority, owner, due_date, account_id)
-    values ('40000000-0000-4000-8000-000000000001', 'cross-account-task', 'Cross-workspace account link', 'todo', 'low', 'Member', current_date + 1, 'account-secondary')$q$,
+  'insert into public.tasks (workspace_id, id, title, status, priority, owner, due_date, account_id)
+    values (''40000000-0000-4000-8000-000000000001'', ''cross-account-task'', ''Cross-workspace account link'', ''todo'', ''low'', ''Member'', current_date + 1, ''account-secondary'')',
   '23503',
   null,
   'task cannot reference an account from another workspace'
 );
 select extensions.throws_ok(
-  $q$insert into public.operational_exceptions (workspace_id, id, title, severity, status, owner, account_id)
-    values ('40000000-0000-4000-8000-000000000001', 'cross-account-exception', 'Cross-workspace account link', 'low', 'open', 'Member', 'account-secondary')$q$,
+  'insert into public.operational_exceptions (workspace_id, id, title, severity, status, owner, account_id)
+    values (''40000000-0000-4000-8000-000000000001'', ''cross-account-exception'', ''Cross-workspace account link'', ''low'', ''open'', ''Member'', ''account-secondary'')',
   '23503',
   null,
   'exception cannot reference an account from another workspace'
