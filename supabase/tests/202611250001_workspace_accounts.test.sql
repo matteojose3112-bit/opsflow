@@ -3,7 +3,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(17);
+select extensions.plan(18);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -61,11 +61,26 @@ select extensions.is(
   'member account update is persisted'
 );
 select extensions.throws_ok(
-  $$insert into public.accounts (workspace_id, id, name)
-    values ('40000000-0000-4000-8000-000000000002', 'cross-workspace-create', 'Not allowed')$$,
+  $insert into public.accounts (workspace_id, id, name)
+    values ('40000000-0000-4000-8000-000000000002', 'cross-workspace-create', 'Not allowed')$,
   '42501',
   null,
   'member cannot create an account in another workspace'
+);
+
+select extensions.throws_ok(
+  $insert into public.tasks (workspace_id, id, title, status, priority, owner, due_date, account_id)
+    values ('40000000-0000-4000-8000-000000000001', 'cross-account-task', 'Cross-workspace account link', 'todo', 'low', 'Member', current_date + 1, 'account-secondary')$,
+  '23503',
+  null,
+  'task cannot reference an account from another workspace'
+);
+select extensions.throws_ok(
+  $insert into public.operational_exceptions (workspace_id, id, title, severity, status, owner, account_id)
+    values ('40000000-0000-4000-8000-000000000001', 'cross-account-exception', 'Cross-workspace account link', 'low', 'open', 'Member', 'account-secondary')$,
+  '23503',
+  null,
+  'exception cannot reference an account from another workspace'
 );
 
 select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000004', true);
@@ -116,7 +131,7 @@ select extensions.is(
 select extensions.is(
   (select count(*)::integer from public.accounts where id = 'account-secondary'),
   1,
-  'admin cannot access a separate workspace account as an owner of another workspace'
+  'owner can read accounts in a second authorized workspace'
 );
 
 select * from extensions.finish();
