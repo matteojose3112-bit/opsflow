@@ -10,7 +10,7 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Current milestone — Workspace-scoped account foundation
 
-**Status: Database schema, RLS, and read-only dashboard integration implemented on PR #15 · Final exact-head validation pending**
+**Status: Database schema, RLS, and read-only dashboard integration implemented on PR #15 · CI and 54 database assertions passed on exact head `f859224f`**
 
 - [x] Review existing account/task domain types and sample-data dependencies.
 - [x] Define the workspace-scoped accounts table, timestamps, constraints, and indexes.
@@ -20,7 +20,7 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Add pgTAP coverage for role permissions, workspace isolation, cross-workspace references, and delete behavior.
 - [x] Add typed account loading and account-load error/empty states in the React app.
 - [x] Replace sample account cards, account counts, health indicators, and task account lookups with workspace-scoped Supabase data.
-- [ ] Run build, lint, reliability tests, and disposable local Supabase tests on the final exact PR head.
+- [x] Run build, lint, reliability tests, and disposable local Supabase tests on exact PR head `f859224f`.
 - [ ] Add safe account create/edit workflows and audit-friendly updates.
 - [ ] Review and merge PR #15 only after all checks pass and explicit approval is given.
 - [ ] Do not apply migrations or modify hosted Supabase without separate explicit approval.
