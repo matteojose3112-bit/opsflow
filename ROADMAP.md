@@ -8,6 +8,19 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
+## Current milestone — Multi-workspace access controls
+
+**Status: Implementation on feature branch; CI and disposable Supabase regression validation pending. Not deployed.**
+
+- [x] Load every workspace visible through the signed-in user's memberships and display its role.
+- [x] Add a workspace selector that reloads tasks and exceptions within the selected workspace.
+- [x] Surface workspace-switch failures without silently replacing the active workspace.
+- [x] Add two-workspace pgTAP fixtures and direct cross-workspace read/update denial assertions.
+- [x] Add direct API regression checks that viewers cannot update tasks or exceptions.
+- [ ] Pass TypeScript/build, lint, reliability tests, and the expanded local Supabase pgTAP suite on the same PR head.
+- [ ] Review the feature branch before any merge or deployment.
+- [ ] Validate workspace switching with two real memberships and distinct browser sessions against a separately authorized hosted test project.
+
 ## Current milestone — Deployed MVP closeout
 
 **Status: Frontend MVP and shared-storage integration implemented; maintenance mode while external validation remains outstanding.**
