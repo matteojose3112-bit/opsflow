@@ -175,9 +175,9 @@ select extensions.throws_ok(
 );
 
 select extensions.throws_ok(
-  $$update public.workspace_members set role = 'owner'
+  $update public.workspace_members set role = 'owner'
        where workspace_id = '20000000-0000-4000-8000-000000000001'
-         and user_id = '10000000-0000-4000-8000-000000000003'$$,
+         and user_id = '10000000-0000-4000-8000-000000000004'$,
   '42501',
   null,
   'owner cannot promote a member through generic role updates'
