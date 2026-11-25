@@ -9,7 +9,7 @@ OpsFlow is a multi-workspace operations dashboard for turning day-to-day busines
 
 ## Current status
 
-**Deployed portfolio MVP · Multi-workspace controls merged · Account schema and RLS implemented on a feature branch · Production validation outstanding**
+**Deployed portfolio MVP · Account foundation and management workflows implemented on PR #15 · Hosted validation outstanding**
 
 The React + TypeScript application is deployed to GitHub Pages. Supabase Auth provides email/password authentication, and workspace-scoped task and operational-exception reads and status updates use PostgreSQL row-level security (RLS). Signed-in users can switch between workspaces they belong to; the selector displays their role and reloads the selected workspace's tasks and exceptions.
 
@@ -34,7 +34,7 @@ The ownership-hardening and multi-workspace changes are merged to `main`. CI, di
 
 ## Data boundaries
 
-OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema, policies, and typed dashboard reads are implemented on the open account-foundation PR. The live site remains unchanged until the migration is separately applied to hosted Supabase and the code is merged and deployed.
+OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema, policies, typed reads, and role-aware management controls are implemented on the open account-foundation PR. The live site remains unchanged until the migration is separately applied to hosted Supabase and the code is merged and deployed.
 
 | Area | Current source |
 | --- | --- |
@@ -46,7 +46,7 @@ OpsFlow currently combines shared operational records with illustrative dashboar
 | KPIs and performance snapshot | Illustrative sample data |
 | Recent activity | Illustrative sample data |
 
-The feature branch now loads account cards, health indicators, task account names, and account counts from the workspace-scoped table. The deployed site still uses the previous release until the migration is applied to hosted Supabase and this branch is released. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
+The feature branch loads account cards, health indicators, task account names, and account counts from the workspace-scoped table. Editors can create and edit accounts; only owners/admins can delete. Mutations require a returned database row before local state changes. The deployed site still uses the previous release until the migration is applied to hosted Supabase and this branch is released. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
 
 ## Next milestone: account management workflows
 
@@ -58,7 +58,7 @@ The database foundation is implemented on PR #15 (`feat/workspace-scoped-account
 - Legacy demo references are preserved by adding the foreign keys as `NOT VALID`; new writes are still checked.
 - 18 pgTAP assertions cover roles, isolation, cross-workspace references, and delete behavior.
 
-The current PR also adds typed account loading in `AuthApp`, passes shared account records into the dashboard, replaces sample account lookups/cards, and handles account-load errors and empty workspaces. Next, add safe account create/edit flows, then rerun CI and disposable Supabase tests on the final exact PR head. Hosted Supabase has not been changed.
+The current PR adds typed account loading, workspace-scoped account creation and editing for editors, and owner/admin-only deletion. The UI handles account-load errors and empty workspaces, and confirms server-returned rows before changing local state. CI and all 54 disposable-local-Supabase assertions pass on exact head `2b4fc91e`. Next, add audit-friendly activity history and stronger account validation. Hosted Supabase has not been changed.
 
 ## Validation still outstanding
 
