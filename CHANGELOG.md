@@ -16,9 +16,8 @@ Notable OpsFlow changes. Completed implementation and pending validation are rec
 - Replaced sample account cards, account counts, health indicators, and task account-name lookups with workspace-scoped account records.
 
 ### Validation
-- Schema and RLS CI passed on commit `15eb0afd`.
-- Disposable local Supabase migration and pgTAP workflow passed on commit `15eb0afd` (18 account assertions; 54 total database assertions including the existing workspace-ownership suite).
-- React account loading and dashboard integration were added afterward; final combined CI and database validation is pending on the current PR head.
+- CI passed on exact PR head `f859224f` (TypeScript/production build, reliability tests, and Oxlint).
+- Disposable local Supabase migration and pgTAP workflow passed on the same exact PR head: 18 account assertions and 54 total database assertions including the existing workspace-ownership suite.
 - Dashboard account reads are implemented on the feature branch; the deployed site remains on the prior release until the migration is separately applied to hosted Supabase and the feature is released.
 - PR #15 remains open and unmerged. No hosted Supabase schema or data has been changed.
 
