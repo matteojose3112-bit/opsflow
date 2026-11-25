@@ -173,6 +173,38 @@ export default function AuthApp() {
     } finally { setLoadingWorkspace(false); }
   }, [session, workspaces, workspace, refreshSession]);
 
+
+  const createAccount = useCallback(async (input: Omit<Account, 'id' | 'updatedAt'>) => {
+    if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
+    const active = await refreshSession(session);
+    const rows = await request<Record<string, unknown>[]>(active,
+      'accounts?select=id,name,industry,owner,health,updated_at',
+      { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ ...input, workspace_id: workspace.id }) });
+    if (rows.length !== 1) throw new Error('The account was not saved. Please refresh and try again.');
+    setAccounts(current => [...current, toAccount(rows[0])].sort((x, y) => x.name.localeCompare(y.name)));
+  }, [session, workspace, refreshSession]);
+
+  const updateAccount = useCallback(async (accountId: string, input: Omit<Account, 'id' | 'updatedAt'>) => {
+    if (!session || !workspace || workspace.role === 'viewer') throw new Error('Your workspace role is read-only.');
+    const active = await refreshSession(session);
+    const rows = await request<Record<string, unknown>[]>(active,
+      'accounts?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(accountId) + '&select=id,name,industry,owner,health,updated_at',
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(input) });
+    if (rows.length !== 1) throw new Error('The account could not be updated. It may have changed or been removed.');
+    const updated = toAccount(rows[0]);
+    setAccounts(current => current.map(item => item.id === accountId ? updated : item).sort((x, y) => x.name.localeCompare(y.name)));
+  }, [session, workspace, refreshSession]);
+
+  const deleteAccount = useCallback(async (accountId: string) => {
+    if (!session || !workspace || workspace.role !== 'owner' && workspace.role !== 'admin') throw new Error('Only workspace owners and admins can delete accounts.');
+    const active = await refreshSession(session);
+    const rows = await request<Array<{ id: string }>>(active,
+      'accounts?workspace_id=eq.' + encodeURIComponent(workspace.id) + '&id=eq.' + encodeURIComponent(accountId) + '&select=id',
+      { method: 'DELETE', headers: { Prefer: 'return=representation' } });
+    if (rows.length !== 1) throw new Error('The account was not deleted. It may have changed or already been removed.');
+    setAccounts(current => current.filter(item => item.id !== accountId));
+  }, [session, workspace, refreshSession]);
+
   async function submitAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
     try {
@@ -227,5 +259,5 @@ export default function AuthApp() {
   if (error && !workspace) return <main className="auth-screen"><section className="auth-card"><h1>Workspace unavailable</h1><p className="auth-error">{error}</p><button className="auth-submit" onClick={() => { setError(''); setSession(current => current ? { ...current } : null); }}>Retry</button><button className="auth-toggle" onClick={() => void signOut()}>Sign out</button></section></main>;
   if (!workspace) return <main className="auth-screen"><section className="auth-card"><h1>Loading OpsFlow…</h1><p>Preparing your workspace.</p></section></main>;
 
-  return <App initialAccounts={accounts} initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} accountsError={accountsError} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
+  return <App onCreateAccount={createAccount} onUpdateAccount={updateAccount} onDeleteAccount={deleteAccount} initialAccounts={accounts} initialTasks={tasks} initialExceptions={exceptions} workspaceName={workspace.name} workspaceId={workspace.id} workspaces={workspaces} workspaceError={error} accountsError={accountsError} onWorkspaceChange={selectWorkspace} userEmail={session.user.email ?? 'Workspace member'} role={workspace.role} onTaskStatusChange={updateTask} onExceptionStatusChange={updateException} onSignOut={() => void signOut()} />;
 }
