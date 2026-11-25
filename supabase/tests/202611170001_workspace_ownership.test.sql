@@ -117,14 +117,14 @@ select extensions.throws_ok(
 
 -- Delete policies filter protected rows rather than raising an error. Assert
 -- the affected-row count and resulting membership state explicitly.
+delete from public.workspace_members
+ where workspace_id = '20000000-0000-4000-8000-000000000001'
+   and user_id = '10000000-0000-4000-8000-000000000001';
 select extensions.is(
-  (with deleted as (
-    delete from public.workspace_members
-     where workspace_id = '20000000-0000-4000-8000-000000000001'
-       and user_id = '10000000-0000-4000-8000-000000000001'
-    returning 1
-  ) select count(*)::integer from deleted),
-  0,
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000001'),
+  1,
   'admin cannot delete the workspace owner membership'
 );
 select extensions.is(
@@ -135,14 +135,14 @@ select extensions.is(
   1,
   'owner membership remains intact after admin delete attempt'
 );
+delete from public.workspace_members
+ where workspace_id = '20000000-0000-4000-8000-000000000001'
+   and user_id = '10000000-0000-4000-8000-000000000003';
 select extensions.is(
-  (with deleted as (
-    delete from public.workspace_members
-     where workspace_id = '20000000-0000-4000-8000-000000000001'
-       and user_id = '10000000-0000-4000-8000-000000000003'
-    returning 1
-  ) select count(*)::integer from deleted),
-  1,
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000003'),
+  0,
   'admin can remove an ordinary member'
 );
 select extensions.is(
@@ -226,14 +226,14 @@ select extensions.is(
 
 -- Even the current owner cannot remove the protected owner row through
 -- generic membership CRUD; transfer remains the only ownership operation.
+delete from public.workspace_members
+ where workspace_id = '20000000-0000-4000-8000-000000000001'
+   and user_id = '10000000-0000-4000-8000-000000000002';
 select extensions.is(
-  (with deleted as (
-    delete from public.workspace_members
-     where workspace_id = '20000000-0000-4000-8000-000000000001'
-       and user_id = '10000000-0000-4000-8000-000000000002'
-    returning 1
-  ) select count(*)::integer from deleted),
-  0,
+  (select count(*)::integer from public.workspace_members
+    where workspace_id = '20000000-0000-4000-8000-000000000001'
+      and user_id = '10000000-0000-4000-8000-000000000002'),
+  1,
   'current owner cannot delete its own owner membership'
 );
 select extensions.is(
