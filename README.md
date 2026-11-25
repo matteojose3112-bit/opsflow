@@ -11,9 +11,9 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 **Deployed frontend MVP · Security hardening in progress · Production validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. The database regression suite has passed all 19 pgTAP assertions against a disposable local Supabase stack. The migration has not been applied to the hosted Supabase project.
+The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. A separate security branch now contains an additive RLS hardening migration and SQL regression tests for workspace ownership boundaries. The database regression suite has passed all 25 pgTAP assertions against a disposable local Supabase stack. The migration has not been applied to the hosted Supabase project.
 
-The latest GitHub Actions build/lint check and dedicated database-test workflow both passed. The latter applied the migrations to a disposable local Supabase database and passed all 19 pgTAP assertions. These checks do not establish live multi-user correctness or production security.
+The latest GitHub Actions build/lint check and dedicated database-test workflow both passed. The latter applied the migrations to a disposable local Supabase database and passed all 25 pgTAP assertions. These checks do not establish live multi-user correctness or production security.
 
 ## Implemented
 
@@ -35,7 +35,7 @@ The branch `fix/workspace-ownership-authorization` adds:
 - An additive migration that preserves owner/admin workspace-name editing while column-level grants prevent ordinary clients from changing `owner_id`.
 - Column-level grants and membership policies that prevent generic CRUD from reassigning member identities, promoting users to owner, or changing/removing the owner membership.
 - A dedicated `transfer_workspace_ownership(workspace_id, new_owner_id)` database function. Only the current owner can use it; the new owner must already be a workspace member, and the former owner becomes an admin.
-- pgTAP regression coverage for admin self-promotion, admin promotion of another member, owner-id changes, membership reassignment, permitted admin metadata/role updates, explicit ownership transfer, viewer restrictions, and non-member isolation.
+- pgTAP regression coverage for admin self-promotion, admin promotion of another member, owner-id changes, membership reassignment, protected-owner deletion, ordinary-member removal, permitted admin metadata/role updates, explicit ownership transfer, viewer restrictions, and non-member isolation.
 - A local Supabase configuration and GitHub Actions workflow for running the database regression suite on relevant pull requests.
 
 This is code-level remediation only. Apply and test it against a disposable Supabase database before considering any hosted rollout. See [docs/shared-storage.md](./docs/shared-storage.md).
