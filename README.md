@@ -34,7 +34,7 @@ The ownership-hardening and multi-workspace changes are merged to `main`. CI, di
 
 ## Data boundaries
 
-OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema and policies are implemented on the open account-foundation PR; the live dashboard still reads account cards from sample data until the client integration is completed and merged.
+OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema, policies, and typed dashboard reads are implemented on the open account-foundation PR. The live site remains unchanged until the migration is separately applied to hosted Supabase and the code is merged and deployed.
 
 | Area | Current source |
 | --- | --- |
@@ -45,9 +45,9 @@ OpsFlow currently combines shared operational records with illustrative dashboar
 | KPIs and performance snapshot | Illustrative sample data |
 | Recent activity | Illustrative sample data |
 
-The new workspace-scoped accounts table defines persistent account records, but the dashboard has not yet switched to reading it. Treat the account UI as sample data until that integration is merged and deployed. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
+The feature branch now loads account cards, health indicators, task account names, and account counts from the workspace-scoped table. The deployed site still uses the previous release until the migration is applied to hosted Supabase and this branch is released. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Next milestone: connect shared account data to the dashboard
+## Next milestone: account management workflows
 
 The database foundation is implemented on PR #15 (`feat/workspace-scoped-accounts`):
 
@@ -57,7 +57,7 @@ The database foundation is implemented on PR #15 (`feat/workspace-scoped-account
 - Legacy demo references are preserved by adding the foreign keys as `NOT VALID`; new writes are still checked.
 - 18 pgTAP assertions cover roles, isolation, cross-workspace references, and delete behavior.
 
-Next, add typed account loading in `AuthApp`, pass shared account records into the dashboard, replace sample account lookups/cards, and handle loading, empty, and error states. Then rerun CI and disposable Supabase tests on the exact same PR head. Hosted Supabase has not been changed.
+The current PR also adds typed account loading in `AuthApp`, passes shared account records into the dashboard, replaces sample account lookups/cards, and handles account-load errors and empty workspaces. Next, add safe account create/edit flows, then rerun CI and disposable Supabase tests on the final exact PR head. Hosted Supabase has not been changed.
 
 ## Validation still outstanding
 
