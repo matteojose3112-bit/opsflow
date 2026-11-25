@@ -41,7 +41,8 @@ OpsFlow currently combines shared operational records with illustrative dashboar
 | Workspaces and memberships | Supabase |
 | Tasks and task status | Supabase workspace tables |
 | Operational exceptions and status | Supabase workspace tables |
-| Accounts schema and permissions | Supabase migration on feature branch; not yet deployed |\n| Account cards and account health in dashboard | Illustrative sample data |
+| Accounts schema and permissions | Supabase migration on feature branch; not yet deployed |
+| Account cards and account health in dashboard | Illustrative sample data |
 | KPIs and performance snapshot | Illustrative sample data |
 | Recent activity | Illustrative sample data |
 
