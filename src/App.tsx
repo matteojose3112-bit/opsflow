@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import MouseEffects from './components/layout/MouseEffects';
 import { sampleData } from './data/sampleData';
 import { formatKpiValue, getDashboardSummary, isKpiOnTarget, isOverdue } from './lib/metrics';
-import type { OperationalException, Task, TaskPriority, TaskStatus } from './types';
+import type { Account, OperationalException, Task, TaskPriority, TaskStatus } from './types';
 import './App.css';
 
 const priorityLabels: Record<TaskPriority, string> = {
@@ -29,8 +29,8 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
-  const account = sampleData.accounts.find((item) => item.id === task.accountId);
+function TaskRow({ task, accounts, onStatusChange, canEdit }: { task: Task; accounts: Account[]; onStatusChange: (taskId: string, status: TaskStatus) => void; canEdit: boolean }) {
+  const account = accounts.find((item) => item.id === task.accountId);
   return (
     <article className="task-row">
       <span className={`task-status-dot ${task.status}`} aria-hidden="true" />
@@ -51,6 +51,7 @@ function TaskRow({ task, onStatusChange, canEdit }: { task: Task; onStatusChange
 }
 
 interface AppProps {
+  initialAccounts: Account[];
   initialTasks: Task[];
   initialExceptions: OperationalException[];
   workspaceName: string;
@@ -65,12 +66,14 @@ interface AppProps {
   onSignOut: () => void;
 }
 
-function App({ initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
+function App({ initialAccounts, initialTasks, initialExceptions, workspaceName, workspaceId, workspaces, workspaceError, onWorkspaceChange, userEmail, role, onTaskStatusChange, onExceptionStatusChange, onSignOut }: AppProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [activeNav, setActiveNav] = useState('Overview');
+  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [exceptions, setExceptions] = useState<OperationalException[]>(initialExceptions);
+  useEffect(() => setAccounts(initialAccounts), [initialAccounts]);
   useEffect(() => setTasks(initialTasks), [initialTasks]);
   useEffect(() => setExceptions(initialExceptions), [initialExceptions]);
   const summary = useMemo(() => getDashboardSummary({ ...sampleData, tasks, exceptions }), [tasks, exceptions]);
@@ -82,8 +85,8 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
   };
   const visibleTasks = useMemo(() => tasks
     .filter((task) => statusFilter === 'all' || task.status === statusFilter)
-    .filter((task) => `${task.title} ${task.owner} ${sampleData.accounts.find((account) => account.id === task.accountId)?.name ?? ''}`.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)), [query, statusFilter, tasks]);
+    .filter((task) => `${task.title} ${task.owner} ${accounts.find((account) => account.id === task.accountId)?.name ?? ''}`.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)) || statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)), [query, statusFilter, tasks, accounts]);
 
   const today = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
@@ -151,7 +154,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
                   {([['all','All tasks'],['in_progress','In progress'],['todo','To do'],['blocked','Blocked']] as const).map(([value,label])=><button key={value} className={statusFilter===value?'selected':''} type="button" onClick={()=>setStatusFilter(value)}>{label}{value==='all'&&<span>{summary.totalTasks}</span>}</button>)}
                 </div>
                 <label className="search-field"><span>⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search tasks or owners..." aria-label="Search tasks or owners" /><kbd>⌘ K</kbd></label>
-                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
+                <div className="task-list">{visibleTasks.map(task=><TaskRow key={task.id} task={task} accounts={accounts} onStatusChange={updateTaskStatus} canEdit={role !== 'viewer'} />)}{visibleTasks.length===0&&<div className="empty-state">No tasks match that search. Try another keyword.</div>}</div>
                 <div className="panel-footer"><span>Showing {visibleTasks.length} of {tasks.length} tasks</span><div className="task-legend"><i className="legend-done" /> Completed <i className="legend-progress" /> In progress <i className="legend-blocked" /> Blocked</div></div>
               </article>
 
@@ -176,7 +179,7 @@ function App({ initialTasks, initialExceptions, workspaceName, workspaceId, work
               </article>
             </section>
 
-            <section className="accounts-section" id="accounts"><div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{sampleData.accounts.length} accounts</span></div><div className="account-grid">{sampleData.accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}</div></section>
+            <section className="accounts-section" id="accounts"><div className="accounts-heading"><div><h2>Account health</h2><p>A quick read on the teams and customers you support.</p></div><span className="accounts-total">{accounts.length} accounts</span></div><div className="account-grid">{accounts.map(account=><article className="account-card" key={account.id}><div className="account-card-top"><span className="account-monogram">{initials(account.name)}</span><span className={`health-pill health-${account.health}`}><i />{account.health.replace('_',' ')}</span></div><strong>{account.name}</strong><span className="account-industry">{account.industry}</span><div className="account-card-footer"><span>{account.owner}</span><span>Updated {formatDate(account.updatedAt)}</span></div></article>)}{accounts.length===0&&<div className="empty-state">No accounts in this workspace yet.</div>}</div></section>
             <footer className="app-footer"><span><span className="footer-mark">◈</span> OpsFlow <span className="footer-divider">/</span> Operational clarity, every day.</span><span>SHARED WORKSPACE · MVP <i /></span></footer>
           </div>
         </main>
