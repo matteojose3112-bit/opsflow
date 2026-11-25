@@ -1,0 +1,34 @@
+name: Database security tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  database-tests:
+    name: Supabase migration and pgTAP tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 3.4.0
+      - name: Start disposable local Supabase stack
+        run: supabase start -x studio,mailpit,imgproxy,edge-runtime,logflare,vector,postgres-meta,supavisor
+      - name: Run database regression tests
+        run: supabase test db
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop --no-backup

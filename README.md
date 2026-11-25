@@ -9,11 +9,11 @@ OpsFlow is a focused operations workspace for turning day-to-day business activi
 
 ## Current status
 
-**Deployed frontend MVP · Maintenance mode · Shared-workspace validation outstanding**
+**Deployed frontend MVP · Ownership security hardening under review · Production validation outstanding**
 
 The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
 
-The repository's latest recorded GitHub Actions CI and Pages deployment runs succeeded on the current pre-closeout commit. This confirms the configured TypeScript/build/lint and deployment workflows at that revision; it does not establish live multi-user correctness or security.
+The task/exception mutation reliability checks now run in CI and confirm server-returned IDs and persisted statuses before updating the interface. A separate ownership-hardening change is under review; local Supabase database tests are still running and hosted multi-user correctness remains unverified.
 
 ## Implemented
 
@@ -29,6 +29,10 @@ The repository's latest recorded GitHub Actions CI and Pages deployment runs suc
 - Reduced-motion and touch-device handling.
 - GitHub Pages deployment configured for the `/opsflow/` project path.
 - GitHub Actions CI for TypeScript/production build, Oxlint, and reliability unit tests.
+
+## Workspace ownership hardening
+
+A separate change adds an additive RLS migration that prevents generic updates to `workspaces.owner_id`, limits membership updates to role changes, protects the owner membership, and provides an owner-only `transfer_workspace_ownership` function. Ownership transfer requires an existing workspace member and demotes the former owner to admin. pgTAP coverage and a disposable local Supabase workflow are included; CI validation is pending. The migration has not been applied to hosted Supabase.
 
 ## Data boundaries
 
@@ -86,6 +90,8 @@ npm run lint
 The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path.
 
 Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supabase. Only the public project URL and publishable/anon key belong in frontend configuration. **Never put a Supabase service-role key in browser code, `VITE_*` variables, or the repository.** RLS—not secrecy of the public client key—must protect workspace data.
+
+To run database regression tests locally, install Docker and the Supabase CLI, then run `supabase start`, `supabase test db`, and `supabase stop --no-backup`. Use only a disposable local/test database.
 
 ## Project history
 

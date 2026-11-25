@@ -6,6 +6,10 @@ The app uses Supabase Auth and workspace-scoped database reads/writes when deplo
 
 The application implements email/password sign-in, workspace membership loading, and role-aware task/exception status controls. The SQL migration defines the corresponding RLS policies. Live multi-user, cross-workspace, and role-enforcement checks remain outstanding; implementation in the repository is not proof that the configured hosted project is correctly provisioned.
 
+## Workspace ownership hardening
+
+The additive migration `supabase/migrations/202611170001_secure_workspace_ownership.sql` limits generic workspace updates to the name column, prevents membership identity reassignment and owner-role manipulation, and protects the owner membership from generic deletion. Ownership transfer is handled by `public.transfer_workspace_ownership(workspace_id, new_owner_id)`, callable only by the current owner; the recipient must already be a member and the former owner becomes an admin. The pgTAP suite is intended for disposable local/test Supabase databases only. CI validation is pending; do not apply the migration to the hosted project until review and validation are complete.
+
 ## Why Supabase
 
 OpsFlow is deployed as a static Vite site on GitHub Pages, so it has no private server process in which to safely store database credentials. Supabase provides PostgreSQL, authentication, and row-level security (RLS). The browser may use only the project's public/anonymous client key; RLS is responsible for protecting data. Never expose a service-role key.
