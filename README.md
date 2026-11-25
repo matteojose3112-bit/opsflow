@@ -2,61 +2,71 @@
 
 **Operational clarity, every day.**
 
-OpsFlow is a focused operations workspace for turning day-to-day business activity into clear priorities. It brings task ownership, deadlines, operational exceptions, account context, and performance indicators into one dashboard.
+OpsFlow is a multi-workspace operations dashboard for turning day-to-day business activity into clear priorities. It brings task ownership, deadlines, operational exceptions, account context, and performance indicators into one interface.
 
 **Live app:** [Open OpsFlow](https://matteojose3112-bit.github.io/opsflow/)  
 **Project approach:** Learn → Build → Test → Understand → Improve → Repeat
 
 ## Current status
 
-**Deployed frontend MVP · Ownership security merged · Multi-workspace controls in review · Production validation outstanding**
+**Deployed portfolio MVP · Workspace ownership and multi-workspace access controls merged · Production validation outstanding**
 
-The React application is deployed to GitHub Pages. Email/password authentication and Supabase-backed, workspace-scoped task and operational-exception reads and status updates are implemented. Database row-level security (RLS) policies define member, editor, and admin access.
+The React + TypeScript application is deployed to GitHub Pages. Supabase Auth provides email/password authentication, and workspace-scoped task and operational-exception reads and status updates use PostgreSQL row-level security (RLS). Signed-in users can switch between workspaces they belong to; the selector displays their role and reloads the selected workspace's tasks and exceptions.
 
-The task/exception mutation reliability checks now run in CI and confirm server-returned IDs and persisted statuses before updating the interface. Workspace ownership hardening is merged to `main`; CI, local Supabase migration/pgTAP tests, and the post-merge Pages deployment passed. The current feature branch adds workspace switching and expanded cross-workspace/viewer regression coverage; it is not deployed.
+The ownership-hardening and multi-workspace changes are merged to `main`. CI, disposable local Supabase migration/pgTAP tests, and GitHub Pages deployment passed after the latest merge. The multi-workspace regression suite includes 36 pgTAP assertions. These automated checks do not replace live validation against separate hosted test identities.
 
 ## Implemented
 
 - Responsive operations dashboard with task ownership, priorities, due dates, overdue states, search, and status filters.
 - Operational exception triage with severity, owner, description, and status updates.
-- Summary metrics and KPI comparisons.
 - Email/password sign-up, sign-in, sign-out, session refresh, and workspace membership loading.
-- Workspace ownership protections and an owner-only atomic ownership-transfer operation.
+- Multi-workspace selector populated from the authenticated user's accessible memberships, with the user's role displayed.
+- Workspace-scoped task and exception reloads when switching workspaces, with a visible error state on failure.
 - Supabase-backed task and exception reads and status updates, scoped by workspace.
-- Confirmed status writes: PATCH requests return the affected row representation, and the client verifies the expected record ID and persisted status before updating the dashboard state.
-- Dependency-free Node.js regression tests for empty, malformed, mismatched, and multi-row mutation responses.
+- Confirmed status writes: the client verifies the returned record ID and persisted status before updating dashboard state.
+- Workspace ownership protections and an owner-only atomic `transfer_workspace_ownership` operation.
 - RLS policies for workspace membership, task/exception access, and role-based editing/deletion.
-- Viewer-role read-only controls in the interface and database policies.
+- Viewer-role read-only restrictions enforced in the interface and database policies.
+- Regression tests for malformed and mismatched mutation responses, cross-workspace access, and viewer write denial.
+- Disposable local Supabase configuration and GitHub Actions database security workflow.
 - Reduced-motion and touch-device handling.
-- GitHub Pages deployment configured for the `/opsflow/` project path.
-- GitHub Actions CI for TypeScript/production build, Oxlint, and reliability unit tests.
-
-## Workspace ownership hardening
-
-The merged additive RLS migration prevents generic updates to `workspaces.owner_id`, limits membership updates to role changes, protects the owner membership, and provides an owner-only `transfer_workspace_ownership` function. Ownership transfer requires an existing workspace member and demotes the former owner to admin. The local pgTAP suite and disposable Supabase workflow pass in CI. The migration has not been applied to hosted Supabase.
+- GitHub Actions CI and GitHub Pages deployment configured for the `/opsflow/` project path.
 
 ## Data boundaries
 
-OpsFlow combines shared operational records with illustrative dashboard data.
+OpsFlow currently combines shared operational records with illustrative dashboard data.
 
 | Area | Current source |
 | --- | --- |
+| Workspaces and memberships | Supabase |
 | Tasks and task status | Supabase workspace tables |
 | Operational exceptions and status | Supabase workspace tables |
-| Accounts and account health | Sample data |
-| KPIs and performance snapshot | Sample data |
-| Recent activity | Sample data |
+| Accounts and account health | Illustrative sample data |
+| KPIs and performance snapshot | Illustrative sample data |
+| Recent activity | Illustrative sample data |
 
-Sample-based metrics and activity are for demonstration, not live business reporting. The current feature branch implements a selector for workspaces the signed-in user belongs to; its release is pending review. Real-time subscriptions, account/KPI/activity persistence, and import of previous browser-local demo edits are not implemented.
+Account information shown in the dashboard is not yet a shared, persistent account-management system. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
+
+## Next milestone: account data foundation
+
+The next planned build is a workspace-scoped `accounts` data model. The work is planned, not yet implemented:
+
+- Define an accounts schema and migration with workspace ownership and appropriate constraints.
+- Add RLS policies for workspace isolation and role-based access.
+- Add disposable local Supabase pgTAP coverage for owner, admin, member, viewer, and non-member behavior.
+- Add typed account loading and replace sample account reads only when the shared data path is validated.
+- Preserve clear loading, empty, and permission/error states.
+- Update documentation and verify all checks against the same commit before review.
+
+No hosted Supabase schema or data has been changed as part of the current release.
 
 ## Validation still outstanding
 
-- Test shared task and exception updates using two distinct accounts and browser sessions.
-- Verify a non-member cannot read or modify another workspace's records.
-- Verify viewer-role restrictions against the live Supabase project, including direct API requests.
-- Verify anonymous access is denied and inspect the deployed project's RLS configuration.
-- Smoke-test the live site on desktop and mobile, including keyboard focus and responsive layouts.
-- Verify loading, empty, network-error, and permission-denied behavior.
+- Test workspace switching and shared task/exception updates using distinct accounts and browser sessions.
+- Verify non-members cannot read or modify another workspace's records through direct API requests.
+- Verify viewer restrictions and anonymous access denial against the hosted Supabase project.
+- Smoke-test the live site on desktop and mobile, including keyboard focus, responsive layouts, and error states.
+- Review the browser session-token storage threat model and authentication/recovery flows.
 
 Until these checks are completed, treat OpsFlow as a deployed portfolio MVP, not a production-validated multi-user operations system. Use sample data only; do not enter real customer, confidential, or sensitive business information.
 
@@ -66,7 +76,7 @@ Until these checks are completed, treat OpsFlow as a deployed portfolio MVP, not
 - **Vite** — development server and production build.
 - **Oxlint** — code linting.
 - **Supabase Auth + PostgreSQL + RLS** — authentication and shared task/exception storage.
-- **GitHub Actions + GitHub Pages** — CI, deployment, and hosting.
+- **GitHub Actions + GitHub Pages** — CI, database regression testing, deployment, and hosting.
 
 ## Local development
 
@@ -78,7 +88,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` for authenticated workspace functionality. Run the checks before publishing:
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` for authenticated workspace functionality. Run the application checks before proposing a change:
 
 ```bash
 npm run build
@@ -86,18 +96,16 @@ npm test
 npm run lint
 ```
 
+For database regression tests, install Docker and the Supabase CLI, then run `supabase start`, `supabase test db`, and `supabase stop --no-backup`. Use only a disposable local/test database.
+
 ## Deployment and credential safety
 
-The app is hosted at `https://matteojose3112-bit.github.io/opsflow/`. Vite uses `/opsflow/` as its base path.
+The app is hosted at [matteojose3112-bit.github.io/opsflow](https://matteojose3112-bit.github.io/opsflow/). Vite uses `/opsflow/` as its base path.
 
 Read [docs/shared-storage.md](./docs/shared-storage.md) before configuring Supabase. Only the public project URL and publishable/anon key belong in frontend configuration. **Never put a Supabase service-role key in browser code, `VITE_*` variables, or the repository.** RLS—not secrecy of the public client key—must protect workspace data.
 
-To run database regression tests locally, install Docker and the Supabase CLI, then run `supabase start`, `supabase test db`, and `supabase stop --no-backup`. Use only a disposable local/test database.
+Hosted Supabase changes require separate explicit authorization. CI database tests use a disposable local Supabase stack.
 
 ## Project history
 
-See [ROADMAP.md](./ROADMAP.md) for implemented scope and outstanding verification, and [CHANGELOG.md](./CHANGELOG.md) for project history.
-
-## Documentation review — 2026-11-03
-
-Documentation review — 2026-11-03: OpsFlow remains a deployed portfolio MVP in maintenance mode. Authentication and workspace-scoped task/exception reads and status updates are implemented through Supabase, with RLS policies documented. Accounts, KPIs, and recent activity remain sample data. Multi-account isolation, viewer permissions, anonymous denial, and live responsive/accessibility checks still require external validation.
+See [ROADMAP.md](./ROADMAP.md) for implemented scope and upcoming work, and [CHANGELOG.md](./CHANGELOG.md) for release history.
