@@ -9,7 +9,7 @@ OpsFlow is a multi-workspace operations dashboard for turning day-to-day busines
 
 ## Current status
 
-**Deployed portfolio MVP · Workspace ownership and multi-workspace access controls merged · Production validation outstanding**
+**Deployed portfolio MVP · Multi-workspace controls merged · Account schema and RLS implemented on a feature branch · Production validation outstanding**
 
 The React + TypeScript application is deployed to GitHub Pages. Supabase Auth provides email/password authentication, and workspace-scoped task and operational-exception reads and status updates use PostgreSQL row-level security (RLS). Signed-in users can switch between workspaces they belong to; the selector displays their role and reloads the selected workspace's tasks and exceptions.
 
@@ -34,31 +34,30 @@ The ownership-hardening and multi-workspace changes are merged to `main`. CI, di
 
 ## Data boundaries
 
-OpsFlow currently combines shared operational records with illustrative dashboard data.
+OpsFlow currently combines shared operational records with illustrative dashboard data. The account schema and policies are implemented on the open account-foundation PR; the live dashboard still reads account cards from sample data until the client integration is completed and merged.
 
 | Area | Current source |
 | --- | --- |
 | Workspaces and memberships | Supabase |
 | Tasks and task status | Supabase workspace tables |
 | Operational exceptions and status | Supabase workspace tables |
-| Accounts and account health | Illustrative sample data |
+| Accounts schema and permissions | Supabase migration on feature branch; not yet deployed |\n| Account cards and account health in dashboard | Illustrative sample data |
 | KPIs and performance snapshot | Illustrative sample data |
 | Recent activity | Illustrative sample data |
 
-Account information shown in the dashboard is not yet a shared, persistent account-management system. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
+The new workspace-scoped accounts table defines persistent account records, but the dashboard has not yet switched to reading it. Treat the account UI as sample data until that integration is merged and deployed. KPI summaries that depend on sample accounts or sample metrics are not live business reporting. Real-time subscriptions, shared account/activity persistence, and import of previous browser-local demo edits are not implemented.
 
-## Next milestone: account data foundation
+## Next milestone: connect shared account data to the dashboard
 
-The next planned build is a workspace-scoped `accounts` data model. The work is planned, not yet implemented:
+The database foundation is implemented on PR #15 (`feat/workspace-scoped-accounts`):
 
-- Define an accounts schema and migration with workspace ownership and appropriate constraints.
-- Add RLS policies for workspace isolation and role-based access.
-- Add disposable local Supabase pgTAP coverage for owner, admin, member, viewer, and non-member behavior.
-- Add typed account loading and replace sample account reads only when the shared data path is validated.
-- Preserve clear loading, empty, and permission/error states.
-- Update documentation and verify all checks against the same commit before review.
+- Workspace-scoped `accounts` table with name, industry, owner, health, and timestamps.
+- RLS: members can read/create/update; owners and admins can delete; viewers are read-only; non-members are isolated.
+- Composite workspace/account foreign keys prevent new task and exception references from crossing workspace boundaries.
+- Legacy demo references are preserved by adding the foreign keys as `NOT VALID`; new writes are still checked.
+- 18 pgTAP assertions cover roles, isolation, cross-workspace references, and delete behavior.
 
-No hosted Supabase schema or data has been changed as part of the current release.
+Next, add typed account loading in `AuthApp`, pass shared account records into the dashboard, replace sample account lookups/cards, and handle loading, empty, and error states. Then rerun CI and disposable Supabase tests on the exact same PR head. Hosted Supabase has not been changed.
 
 ## Validation still outstanding
 
