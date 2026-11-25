@@ -8,9 +8,9 @@ Progress is marked complete only when the implementation exists. External valida
 
 ---
 
-## Current milestone — Workspace-scoped account foundation
+## Current milestone — Workspace-scoped account management
 
-**Status: Database schema, RLS, and read-only dashboard integration implemented on PR #15 · CI and 54 database assertions passed on exact head `f859224f`**
+**Status: Schema, RLS, account reads, and CRUD controls implemented on PR #15 · CI and 54 database assertions passed on exact head `2b4fc91e`**
 
 - [x] Review existing account/task domain types and sample-data dependencies.
 - [x] Define the workspace-scoped accounts table, timestamps, constraints, and indexes.
@@ -20,8 +20,10 @@ Progress is marked complete only when the implementation exists. External valida
 - [x] Add pgTAP coverage for role permissions, workspace isolation, cross-workspace references, and delete behavior.
 - [x] Add typed account loading and account-load error/empty states in the React app.
 - [x] Replace sample account cards, account counts, health indicators, and task account lookups with workspace-scoped Supabase data.
-- [x] Run build, lint, reliability tests, and disposable local Supabase tests on exact PR head `f859224f`.
-- [ ] Add safe account create/edit workflows and audit-friendly updates.
+- [x] Run build, lint, reliability tests, and disposable local Supabase tests on exact PR head `2b4fc91e`.
+- [x] Add workspace-scoped account create/edit workflows for editors and owner/admin-only deletion.
+- [x] Verify returned account rows before updating dashboard state.
+- [ ] Add audit-friendly activity history for account changes.
 - [ ] Review and merge PR #15 only after all checks pass and explicit approval is given.
 - [ ] Do not apply migrations or modify hosted Supabase without separate explicit approval.
 
@@ -73,9 +75,9 @@ Progress is marked complete only when the implementation exists. External valida
 
 ## Phase 3 — Operational data and insights
 
-**Status: Partially planned · Shared account foundation is in review; account management and activity history remain**
+**Status: Partially planned · Account management is in review; shared activity history remains**
 
-- [ ] Persist account records and account health in the shared database.
+- [x] Persist account records and account health in the shared database (implemented on PR #15; release pending).
 - [ ] Move operational activity history into auditable shared records.
 - [ ] Add richer task filtering, sorting, and date-based views.
 - [ ] Define KPI formulas, data sources, targets, and calculation windows.
