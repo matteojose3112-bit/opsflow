@@ -92,11 +92,11 @@ select extensions.throws_ok(
   null,
   'viewer cannot create accounts'
 );
-select extensions.throws_ok(
-  $$update public.accounts set health = 'critical'
-    where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'$$,
-  '42501',
-  null,
+update public.accounts set health = 'critical'
+ where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary';
+select extensions.is(
+  (select health from public.accounts where workspace_id = '40000000-0000-4000-8000-000000000001' and id = 'account-primary'),
+  'at_risk',
   'viewer cannot update accounts'
 );
 delete from public.accounts
