@@ -109,3 +109,8 @@ Hosted Supabase changes require separate explicit authorization. CI database tes
 ## Project history
 
 See [ROADMAP.md](./ROADMAP.md) for implemented scope and upcoming work, and [CHANGELOG.md](./CHANGELOG.md) for release history.
+
+
+## Documentation maintenance — 2026-11-27
+
+Status boundary: workspace-scoped tasks and operational exceptions, multi-workspace switching, and ownership protections are merged to main and deployed. Workspace-scoped account schema, reads, and CRUD controls are documented as work on PR #15 only; they are not part of the deployed release until that change is approved, merged, and separately applied to hosted Supabase. Hosted Supabase has not been changed. Do not treat sample KPI/activity data as live reporting. Hosted multi-identity authorization checks remain outstanding.
