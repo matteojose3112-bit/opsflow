@@ -7,7 +7,6 @@ import { loadSession, saveSession, type Session } from './lib/sessionStorage.js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-const sessionKey = 'opsflow-supabase-session-v1';
 
 type Workspace = { id: string; name: string; role: string };
 type ApiError = { message?: string; msg?: string; error_description?: string };
