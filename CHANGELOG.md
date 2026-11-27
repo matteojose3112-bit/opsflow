@@ -1,5 +1,11 @@
 # Changelog
 
+## Documentation maintenance — 2026-11-27
+
+- Synchronized README and roadmap with the current release boundary: multi-workspace access and ownership hardening are merged/deployed; account schema and CRUD remain on unmerged PR #15.
+- Reiterated that CI and disposable local Supabase tests do not modify or validate the hosted database.
+- Hosted migration, PR merge, and deployment are not performed by this documentation-only pass. Hosted validation with separate test identities remains open.
+
 Notable OpsFlow changes. Completed implementation and pending validation are recorded separately.
 
 ---
