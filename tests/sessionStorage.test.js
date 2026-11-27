@@ -5,7 +5,7 @@ import {
   loadSession,
   saveSession,
   sessionStorageKey,
-} from "../src/lib/sessionStorage.js";
+} from "../src/lib/sessionStorage.ts";
 
 function createStorage(initial = null) {
   let value = initial;
