@@ -133,3 +133,8 @@ Build in small steps, verify each milestone, and introduce complexity only when 
 ---
 
 Review date: 2026-11-25
+
+
+## Maintenance review — 2026-11-27
+
+PR #15 account management remains unmerged. Its local migration/pgTAP and CI results do not authorize or imply a hosted Supabase migration. Keep the account work marked as feature-branch implementation until explicit review/merge approval and separate hosted-database authorization are obtained. The merged workspace foundation is deployed, but live multi-identity authorization and session-security validation remain open.
