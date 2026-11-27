@@ -3,13 +3,11 @@ import App from './App';
 import type { Account, OperationalException, Task, TaskStatus } from './types';
 import './AuthApp.css';
 import { confirmSingleUpdatedRow } from './lib/mutationResponse.js';
+import { loadSession, saveSession, type Session } from './lib/sessionStorage.js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-const sessionKey = 'opsflow-supabase-session-v1';
 
-type User = { id: string; email?: string };
-type Session = { access_token: string; refresh_token: string; expires_at?: number; expires_in?: number; user: User };
 type Workspace = { id: string; name: string; role: string };
 type ApiError = { message?: string; msg?: string; error_description?: string };
 
@@ -30,17 +28,6 @@ async function authRequest(path: string, body: unknown): Promise<Session> {
   const payload: unknown = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(getError(payload, 'Authentication request failed.'));
   return payload as Session;
-}
-
-function readSession(): Session | null {
-  try {
-    const raw = localStorage.getItem(sessionKey);
-    return raw ? JSON.parse(raw) as Session : null;
-  } catch { return null; }
-}
-function saveSession(session: Session | null) {
-  if (session) localStorage.setItem(sessionKey, JSON.stringify(session));
-  else localStorage.removeItem(sessionKey);
 }
 
 async function request<T>(session: Session, path: string, options: RequestInit = {}): Promise<T> {
@@ -80,7 +67,7 @@ function toException(row: Record<string, unknown>): OperationalException {
 }
 
 export default function AuthApp() {
-  const [session, setSession] = useState<Session | null>(() => readSession());
+  const [session, setSession] = useState<Session | null>(() => loadSession());
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignup, setIsSignup] = useState(false);
@@ -213,7 +200,8 @@ export default function AuthApp() {
         setNotice('Account created. Check your email to confirm it, then sign in here.'); setIsSignup(false);
       } else {
         payload.expires_at = Math.floor(Date.now() / 1000) + (payload.expires_in ?? 3600);
-        saveSession(payload); setSession(payload);
+        if (!saveSession(payload)) throw new Error('Sign-in succeeded, but browser storage is unavailable. Enable site storage and try again.');
+        setSession(payload);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not authenticate.');
